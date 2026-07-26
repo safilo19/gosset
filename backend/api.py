@@ -55,7 +55,10 @@ from backend.core import tests as tests_core
 
 CORS_ORIGINS = [
     origin.strip()
-    for origin in os.environ.get("CORS_ORIGINS", "http://localhost:5173,http://localhost:3000").split(",")
+    for origin in os.environ.get(
+        "CORS_ORIGINS",
+        "http://localhost:5173,http://localhost:3000,https://personal-analytics-mcp.vercel.app",
+    ).split(",")
 ]
 
 app = FastAPI(title="Personal Data Analysis & BI Toolkit API")
