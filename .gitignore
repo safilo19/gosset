@@ -1,0 +1,17 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Generated report output (regenerated on demand, not source)
+output/
+
+# Frontend (frontend/ has its own .gitignore for node_modules/dist; this covers env files)
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
