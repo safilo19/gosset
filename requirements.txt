@@ -13,6 +13,7 @@ anyio==4.14.2
 attrs==26.1.0
 certifi==2026.7.22
 cffi==2.1.0
+charset-normalizer==3.4.9
 click==8.4.2
 colorama==0.4.6
 contourpy==1.3.3
@@ -28,6 +29,9 @@ httpx-sse==0.4.3
 idna==3.18
 joblib==1.5.3
 jsonschema==4.26.0
+# Word export. python-docx + its lxml dependency are both pure-Python/manylinux wheels, unlike
+# the weasyprint/GTK route which needs system libraries that don't install cleanly on Windows.
+lxml==6.1.1
 jsonschema-specifications==2025.9.1
 kiwisolver==1.5.0
 markdown-it-py==4.2.0
@@ -50,15 +54,26 @@ Pygments==2.20.0
 PyJWT==2.13.0
 pyparsing==3.3.2
 python-dateutil==2.9.0.post0
+python-docx==1.2.0
+# PowerPoint export (a result block as a one-slide deck). python-pptx is a pure-Python wheel with no
+# compiled dependencies, same as python-docx — it needs Pillow and XlsxWriter, both already required
+# or pure-Python, so it adds nothing that has to build from source on Windows.
+python-pptx==1.0.2
+XlsxWriter==3.2.9
 python-dotenv==1.2.2
 python-multipart==0.0.32
 referencing==0.37.0
+reportlab==5.0.0
 rich==15.0.0
 rpds-py==2026.6.3
 scikit-learn==1.9.0
 scipy==1.17.1
 shellingham==1.5.4
 six==1.17.0
+# The branded PDF's mark is vector: report_engine/components.py lazily imports svglib.svglib to turn
+# frontend/brand/mark.svg into a reportlab Drawing. It was missing here while still being installed
+# locally, so the PDF export worked on this machine and would have failed on a clean install.
+svglib==2.0.2
 sse-starlette==3.4.6
 starlette==1.3.1
 statsmodels==0.14.6

@@ -1,4 +1,4 @@
-"""Entry point: Personal Data Analysis & BI Toolkit MCP server (stdio transport)."""
+"""Entry point: the Gosset MCP server (stdio transport)."""
 
 from analytics_mcp.app import mcp
 from analytics_mcp import tools  # noqa: F401  (import registers the tools on `mcp`)

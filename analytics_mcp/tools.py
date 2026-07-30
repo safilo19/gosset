@@ -15,6 +15,8 @@ from mcp.types import CallToolResult, ImageContent, TextContent, ToolAnnotations
 from backend.core import charts as charts_core
 from backend.core import datasets as datasets_core
 from backend.core import forecasting as forecasting_core
+from backend.core import graphs as graphs_core
+from backend.core import predictive as predictive_core
 from backend.core import regression as regression_core
 from backend.core import reports as reports_core
 from backend.core import segmentation as segmentation_core
@@ -32,8 +34,11 @@ from .models import (
     DescribeDatasetInput,
     DescribeDatasetOutput,
     ExportReportInput,
+    GetGraphDataInput,
+    GetGraphDataOutput,
     ExportReportOutput,
     FeatureCoefficient,
+    FeatureImportance,
     ForecastPoint,
     ForecastTimeseriesInput,
     ForecastTimeseriesOutput,
@@ -43,8 +48,17 @@ from .models import (
     ListDatasetsOutput,
     LoadDatasetInput,
     LoadDatasetOutput,
+    ModelComparisonResult,
+    RunAutoMLInput,
+    RunAutoMLOutput,
+    RunDecisionTreeInput,
+    RunDecisionTreeOutput,
+    RunGradientBoostingInput,
+    RunGradientBoostingOutput,
     RunHypothesisTestInput,
     RunHypothesisTestOutput,
+    RunRandomForestInput,
+    RunRandomForestOutput,
     RunRegressionInput,
     RunRegressionOutput,
     RunSegmentationInput,
@@ -237,6 +251,110 @@ def run_segmentation(input: RunSegmentationInput) -> Annotated[CallToolResult, R
 
 
 @mcp.tool(annotations=READ_ONLY)
+def run_decision_tree(input: RunDecisionTreeInput) -> Annotated[CallToolResult, RunDecisionTreeOutput]:
+    """Fit a decision tree (classifier or regressor, auto-detected from the target) with cross-validated
+    accuracy/F1 or R²/RMSE, ranked feature importances, and the top splits as plain text."""
+    dataset = store.get(input.dataset_id)
+    store.require_columns(dataset, [input.target, *input.features])
+
+    outcome = predictive_core.fit_decision_tree(dataset.df, input.target, input.features, input.task_type)
+
+    output = RunDecisionTreeOutput(
+        dataset_id=dataset.dataset_id,
+        target=input.target,
+        features=input.features,
+        task_type_used=outcome.task_type_used,
+        method_reason=outcome.method_reason,
+        n_obs=outcome.n_obs,
+        metric_label=outcome.metric_label,
+        metric_value=outcome.metric_value,
+        secondary_metric_label=outcome.secondary_metric_label,
+        secondary_metric_value=outcome.secondary_metric_value,
+        feature_importances=[FeatureImportance(**asdict(f)) for f in outcome.feature_importances],
+        tree_summary=outcome.tree_summary,
+        summary=outcome.summary,
+    )
+    return CallToolResult(content=_text(*outcome.content_lines), structuredContent=output.model_dump(mode="json"))
+
+
+@mcp.tool(annotations=READ_ONLY)
+def run_random_forest(input: RunRandomForestInput) -> Annotated[CallToolResult, RunRandomForestOutput]:
+    """Fit a random forest (classifier or regressor, auto-detected from the target) with cross-validated
+    accuracy/F1 or R²/RMSE and ranked feature importances."""
+    dataset = store.get(input.dataset_id)
+    store.require_columns(dataset, [input.target, *input.features])
+
+    outcome = predictive_core.fit_random_forest(dataset.df, input.target, input.features, input.task_type)
+
+    output = RunRandomForestOutput(
+        dataset_id=dataset.dataset_id,
+        target=input.target,
+        features=input.features,
+        task_type_used=outcome.task_type_used,
+        method_reason=outcome.method_reason,
+        n_obs=outcome.n_obs,
+        metric_label=outcome.metric_label,
+        metric_value=outcome.metric_value,
+        secondary_metric_label=outcome.secondary_metric_label,
+        secondary_metric_value=outcome.secondary_metric_value,
+        feature_importances=[FeatureImportance(**asdict(f)) for f in outcome.feature_importances],
+        summary=outcome.summary,
+    )
+    return CallToolResult(content=_text(*outcome.content_lines), structuredContent=output.model_dump(mode="json"))
+
+
+@mcp.tool(annotations=READ_ONLY)
+def run_gradient_boosting(input: RunGradientBoostingInput) -> Annotated[CallToolResult, RunGradientBoostingOutput]:
+    """Fit a gradient boosting model (classifier or regressor, auto-detected from the target) with cross-validated
+    accuracy/F1 or R²/RMSE and ranked feature importances."""
+    dataset = store.get(input.dataset_id)
+    store.require_columns(dataset, [input.target, *input.features])
+
+    outcome = predictive_core.fit_gradient_boosting(dataset.df, input.target, input.features, input.task_type)
+
+    output = RunGradientBoostingOutput(
+        dataset_id=dataset.dataset_id,
+        target=input.target,
+        features=input.features,
+        task_type_used=outcome.task_type_used,
+        method_reason=outcome.method_reason,
+        n_obs=outcome.n_obs,
+        metric_label=outcome.metric_label,
+        metric_value=outcome.metric_value,
+        secondary_metric_label=outcome.secondary_metric_label,
+        secondary_metric_value=outcome.secondary_metric_value,
+        feature_importances=[FeatureImportance(**asdict(f)) for f in outcome.feature_importances],
+        summary=outcome.summary,
+    )
+    return CallToolResult(content=_text(*outcome.content_lines), structuredContent=output.model_dump(mode="json"))
+
+
+@mcp.tool(annotations=READ_ONLY)
+def run_automl(input: RunAutoMLInput) -> Annotated[CallToolResult, RunAutoMLOutput]:
+    """Cross-validate every applicable model for the task (linear/logistic regression, decision tree, random
+    forest, gradient boosting), rank them by mean score, and recommend the best one with a plain-language reason."""
+    dataset = store.get(input.dataset_id)
+    store.require_columns(dataset, [input.target, *input.features])
+
+    outcome = predictive_core.run_automl(dataset.df, input.target, input.features, input.task_type)
+
+    output = RunAutoMLOutput(
+        dataset_id=dataset.dataset_id,
+        target=input.target,
+        features=input.features,
+        task_type_used=outcome.task_type_used,
+        method_reason=outcome.method_reason,
+        n_obs=outcome.n_obs,
+        metric_label=outcome.metric_label,
+        results=[ModelComparisonResult(**asdict(r)) for r in outcome.results],
+        best_model=outcome.best_model,
+        best_score=outcome.best_score,
+        summary=outcome.summary,
+    )
+    return CallToolResult(content=_text(*outcome.content_lines), structuredContent=output.model_dump(mode="json"))
+
+
+@mcp.tool(annotations=READ_ONLY)
 def generate_chart(input: GenerateChartInput) -> Annotated[CallToolResult, GenerateChartOutput]:
     """Generate a bar/line/scatter/histogram/heatmap chart (matplotlib) as a base64 PNG, saved to a temp file for reuse by export_report."""
     dataset = store.get(input.dataset_id)
@@ -261,16 +379,54 @@ def generate_chart(input: GenerateChartInput) -> Annotated[CallToolResult, Gener
     return CallToolResult(content=content, structuredContent=output.model_dump(mode="json"))
 
 
+@mcp.tool(annotations=READ_ONLY)
+def get_graph_data(input: GetGraphDataInput) -> Annotated[CallToolResult, GetGraphDataOutput]:
+    """Compute the series behind any of the app's graph types — histogram bins, boxplot five-number
+    summaries, ECDF steps, normal-probability quantiles, distribution curves, correlation matrices,
+    interpolated 3D grids, and so on. Read-only: it computes from a loaded dataset and returns
+    numbers, drawing nothing itself."""
+    dataset = store.get(input.dataset_id)
+    data = graphs_core.compute(dataset.df, input.graph_type, input.columns, input.options)
+    summary_text = (
+        f"Computed {input.graph_type} data for dataset '{dataset.dataset_id}'"
+        + (f" on {', '.join(input.columns)}" if input.columns else "")
+        + f". Keys returned: {', '.join(sorted(data.keys()))}."
+    )
+    output = GetGraphDataOutput(dataset_id=dataset.dataset_id, graph_type=input.graph_type, data=data, summary=summary_text)
+    return CallToolResult(content=_text(summary_text), structuredContent=output.model_dump(mode="json"))
+
+
 @mcp.tool(annotations=WRITES_FILES)
 def export_report(input: ExportReportInput) -> Annotated[CallToolResult, ExportReportOutput]:
-    """Format prior analysis results (structuredContent from earlier tool calls) into an xlsx workbook and/or
-    Markdown report under output/. Writes files, so this is NOT read-only — but it's non-destructive: it only
-    creates new report files and never modifies or deletes existing data."""
+    """Format prior analysis results (structuredContent from earlier tool calls) into a report under output/ —
+    a formatted PDF, a Word .docx, an xlsx workbook, Markdown, or 'both' for markdown + xlsx. PDF and Word get
+    a title block, real heading styles, shaded tables and an embedded chart per section. Writes files, so this
+    is NOT read-only — but it's non-destructive: it only creates new report files and never modifies or deletes
+    existing data."""
     dataset = store.get(input.dataset_id)
 
     stem = input.report_name or reports_core.default_stem(dataset.dataset_id)
-    sections = [reports_core.ReportSection(title=a.title, data=a.data, chart_path=a.chart_path) for a in input.analyses]
-    paths = reports_core.build_report(dataset.dataset_id, input.format, sections, stem)
+    sections = [
+        reports_core.ReportSection(
+            title=a.title,
+            data=a.data,
+            chart_path=a.chart_path,
+            chart_image_base64=a.chart_image_base64,
+            analysis_id=a.analysis_id,
+            note=a.note,
+            columns=a.columns,
+            timestamp=a.timestamp,
+        )
+        for a in input.analyses
+    ]
+    meta = reports_core.ReportMeta(
+        dataset_id=dataset.dataset_id,
+        source=dataset.source,
+        row_count=len(dataset.df),
+        column_count=len(dataset.df.columns),
+        decimals=input.decimals,
+    )
+    paths = reports_core.build_report(meta, input.format, sections, stem)
     summary_text = reports_core.summarize_export(dataset.dataset_id, [a.title for a in input.analyses], paths)
 
     output = ExportReportOutput(

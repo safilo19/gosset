@@ -1,0 +1,150 @@
+name: Release
+
+# Tag-driven: pushing v1.0.0 builds the Windows installer and publishes it as a GitHub Release.
+#
+#   git tag v1.0.0 && git push origin v1.0.0
+#
+# The tag is checked against desktop/package.json before anything is built (see the guard step). That
+# field is the single source of truth for the version — it stamps the installer filename, the About
+# window and the PDF footers — so a tag that disagrees with it would produce a release whose asset
+# name and whose in-app version differ. Failing in ten seconds is better than discovering it after a
+# twelve-minute build.
+on:
+  push:
+    tags:
+      - 'v*'
+  # Buildable without tagging, to check the workflow itself. Produces an artifact, not a Release.
+  workflow_dispatch:
+
+permissions:
+  contents: write # required to create the Release and upload assets
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # 3.11 deliberately, not "latest": requirements.txt is pinned to the versions tested on 3.11,
+      # and several of them have no wheels for the newest Python — a resolver left to its own devices
+      # is how a release ships a subtly different scipy from the one the analyses were verified
+      # against.
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: desktop/package-lock.json
+
+      - name: Check the tag matches desktop/package.json
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          pkg="$(node -p "require('./desktop/package.json').version")"
+          echo "tag=$tag  package.json=$pkg"
+          if [ "$tag" != "$pkg" ]; then
+            echo "::error::Tag v$tag does not match desktop/package.json version $pkg."
+            echo "::error::Bump the version field, run \`npm run stamp\` in desktop/, commit, then re-tag."
+            exit 1
+          fi
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install -r requirements-build.txt
+
+      - name: Install Node dependencies
+        working-directory: desktop
+        run: npm ci
+
+      # Fails if backend/version.py or frontend/brand/version.js has drifted from package.json,
+      # rather than silently building an app whose About window shows the wrong number.
+      - name: Check the version stamp is committed
+        working-directory: desktop
+        run: npm run stamp -- --check
+
+      - name: Generate icons from the brand mark
+        working-directory: desktop
+        run: npm run icons
+
+      - name: Freeze the Python backend (PyInstaller)
+        working-directory: desktop
+        run: npm run build:sidecar
+
+      # The build's own guard: prove the frozen backend actually serves and that every heavy
+      # dependency imports, BEFORE wrapping it in an installer. PyInstaller reports success for a
+      # bundle whose statsmodels or reportlab is missing a hidden import; that only shows up when the
+      # code path runs. Catching it here rather than in a user's bug report is the whole point.
+      - name: Smoke-test the frozen backend
+        shell: bash
+        run: |
+          exe="$LOCALAPPDATA/gosset-build/sidecar/gosset-sidecar/gosset-sidecar.exe"
+          "$exe" --port 8199 --output-dir "$RUNNER_TEMP/gosset-out" &
+          for i in $(seq 1 90); do
+            curl -sf http://127.0.0.1:8199/health >/dev/null && break
+            sleep 2
+          done
+          python desktop/scripts/smoke_sidecar.py http://127.0.0.1:8199
+
+      - name: Build the installer (electron-builder)
+        working-directory: desktop
+        # Unsigned on purpose — see the README. Left explicit so a future signing setup is one
+        # secret and one line, not an archaeology exercise.
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx electron-builder --config electron-builder.config.cjs --publish never
+
+      - name: Collect the installer
+        id: collect
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          cp "$LOCALAPPDATA/gosset-build/electron"/Gosset-Setup-*.exe artifacts/
+          ls -l artifacts
+          echo "name=$(basename artifacts/Gosset-Setup-*.exe)" >> "$GITHUB_OUTPUT"
+
+      # Always uploaded, so a workflow_dispatch run (no tag, no Release) still produces something
+      # downloadable to test.
+      - name: Upload as a workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.collect.outputs.name }}
+          path: artifacts/*.exe
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish the GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*.exe
+          draft: false
+          generate_release_notes: true
+          name: Gosset ${{ github.ref_name }}
+          body: |
+            ## Gosset ${{ github.ref_name }}
+
+            **Download:** `${{ steps.collect.outputs.name }}` below.
+
+            ### Installing
+
+            The installer is **not code-signed**, so Windows SmartScreen will warn that it is from an
+            unrecognized publisher the first time you run it. To continue, click **More info** and
+            then **Run anyway**. A code-signing certificate is a paid annual subscription; until
+            there is one, this warning is expected and there is no way around it.
+
+            Gosset installs per-user (no administrator rights needed), adds a desktop and Start Menu
+            shortcut, and registers `.gsp` project files so double-clicking one opens it.
+
+            Everything runs locally. No account, no network access, no telemetry.

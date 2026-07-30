@@ -1,0 +1,15 @@
+# Build-only dependencies — needed to PRODUCE the desktop installer, never to run the app.
+#
+# Kept out of requirements.txt on purpose: that file is the runtime list, and it is also what the
+# hosted deployment installs. PyInstaller there would be dead weight on every deploy.
+#
+# 6.21 or newer is a hard floor, not a preference. PyInstaller 6.11 ships hooks that predate
+# numpy 2.4 and pandas 3.0, and with those the bundle builds cleanly and then dies on startup with
+# "No module named 'numpy._core._exceptions'" — the C-extension import failing inside a partially
+# collected numpy.
+pyinstaller>=6.21
+
+# svglib parses the brand mark's SVG through these; they are lazy imports it does not declare, so
+# PyInstaller cannot see them and the .spec lists them as hidden imports.
+cssselect2>=0.7
+tinycss2>=1.2

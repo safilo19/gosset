@@ -1,0 +1,110 @@
+/**
+ * electron-builder: the Windows NSIS installer.
+ *
+ * A .cjs config rather than YAML because two paths have to be COMPUTED, not written down:
+ * the PyInstaller bundle and the installer output both live outside the repository (see
+ * scripts/paths.mjs for why — this repo sits in a OneDrive folder, and build artifacts in a synced
+ * directory break rebuilds). YAML cannot express that, and hardcoding an absolute path would break
+ * on CI.
+ *
+ * The version is NOT set here. electron-builder reads it from package.json, which is the single
+ * source of truth that scripts/stamp-version.mjs propagates into the app's About window and the PDF
+ * footers. Setting it in two places is how they drift.
+ */
+
+const { existsSync } = require('node:fs');
+const { join } = require('node:path');
+
+// paths.mjs is ESM and this config is CJS, so the constants are recomputed here rather than imported.
+// Kept deliberately trivial and in one place; if these ever diverge the installer ships with no
+// backend, so build-sidecar.mjs asserts its own output exists and the check below asserts it again.
+const buildDir =
+  process.env.GOSSET_BUILD_DIR ||
+  join(process.env.LOCALAPPDATA || require('node:os').homedir(), 'gosset-build');
+const sidecarDir = join(buildDir, 'sidecar', 'gosset-sidecar');
+
+// Fail the build here, with a sentence that says what to do, rather than shipping an installer whose
+// app cannot start. This is the single most expensive mistake this config could make: the installer
+// looks fine, installs fine, and the app dies on launch on someone else's machine.
+if (!existsSync(join(sidecarDir, 'gosset-sidecar.exe'))) {
+  throw new Error(
+    `The Python sidecar is not built.\n` +
+      `  expected: ${join(sidecarDir, 'gosset-sidecar.exe')}\n` +
+      `  fix:      run \`npm run build:sidecar\` in desktop/ first (or \`npm run build\`, which does both).`,
+  );
+}
+
+module.exports = {
+  appId: 'com.gosset.workbench',
+  productName: 'Gosset',
+  copyright: `Copyright © ${new Date().getFullYear()} Gosset. All rights reserved.`,
+
+  directories: {
+    // build/ holds icon.ico and gsp.ico, generated from mark.svg by scripts/make_app_icons.py.
+    buildResources: 'build',
+    output: join(buildDir, 'electron'),
+  },
+
+  // Only the shell's own code. The frontend and the Python backend both travel inside the sidecar
+  // bundle (the frontend is SERVED by FastAPI, not loaded from disk by Electron), so packaging them
+  // here as well would ship two copies and let them disagree.
+  files: ['src/**/*', 'package.json'],
+
+  extraResources: [
+    {
+      from: sidecarDir,
+      to: 'sidecar/gosset-sidecar',
+      // .pyc caches and PyInstaller's own build leftovers are not runtime files.
+      filter: ['**/*', '!**/__pycache__/**', '!**/*.pyc'],
+    },
+  ],
+
+  // The bundle is ~265 MB of already-compressed wheels and DLLs; 'maximum' spends several minutes of
+  // build time to save very little, because there is little left to squeeze.
+  compression: 'normal',
+
+  win: {
+    target: [{ target: 'nsis', arch: ['x64'] }],
+    icon: 'build/icon.ico',
+    // No signing. See the README's download section: the installer is unsigned because a
+    // code-signing certificate costs money, so SmartScreen shows "unrecognized app" on first run.
+    // That is stated plainly to users rather than worked around.
+    signAndEditExecutable: true,
+    fileAssociations: [
+      {
+        ext: 'gsp',
+        name: 'Gosset Project',
+        description: 'Gosset Project',
+        icon: 'build/gsp.ico',
+        // Editor, not Viewer: opening a project and then saving over it is the normal flow.
+        role: 'Editor',
+      },
+    ],
+  },
+
+  nsis: {
+    // Per-user, so installing needs no administrator and no UAC prompt. The consequence to keep in
+    // mind: the app lands in %LOCALAPPDATA%\Programs\Gosset, which is per-user and writable — which
+    // is exactly why the app must NOT write reports there (it uses userData/output instead).
+    oneClick: false,
+    perMachine: false,
+    allowElevation: false,
+    allowToChangeInstallationDirectory: true,
+
+    createDesktopShortcut: true,
+    createStartMenuShortcut: true,
+    shortcutName: 'Gosset',
+
+    // The uninstaller removes the shortcuts and the file association. It deliberately does NOT
+    // remove %APPDATA%\Gosset — that holds the user's window position, options and any reports they
+    // exported, and an uninstaller that deletes documents is a bug.
+    deleteAppDataOnUninstall: false,
+
+    // A stable GUID so an upgrade replaces the previous install instead of appearing as a second
+    // "Gosset" entry in Apps & features. Never change this once a release has shipped.
+    guid: 'e3a3f4f2-6d1c-4a95-9b8e-2f7c5a1d0b64',
+
+    artifactName: 'Gosset-Setup-${version}.${ext}',
+    uninstallDisplayName: 'Gosset ${version}',
+  },
+};

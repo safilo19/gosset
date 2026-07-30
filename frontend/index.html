@@ -2,12 +2,259 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/brand/favicon.ico" sizes="16x16 32x32 48x48" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/brand/favicon-48.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Personal Data Analysis & BI Toolkit</title>
+    <title>Gosset</title>
+
+    <!-- Theme, applied before the stylesheets so opening the app in dark mode never flashes white.
+         It reads the same localStorage key and the same 'system' fallback as settings.js, and
+         themeMode.js takes over once the modules load. The two literal colors are the only place
+         in the app that duplicates a token value — there is no CSS to read from yet, and they are
+         cleared by themeMode.apply() the moment the stylesheet is in charge. -->
+    <script>
+      (function () {
+        var mode = 'system';
+        try {
+          var raw = localStorage.getItem('pa.settings.v1');
+          if (raw) {
+            var saved = JSON.parse(raw);
+            if (saved && (saved.theme === 'light' || saved.theme === 'dark')) mode = saved.theme;
+          }
+        } catch (e) {
+          /* private mode / disabled storage — fall through to the system preference */
+        }
+        var dark = mode === 'dark' || (mode === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        var root = document.documentElement;
+        root.setAttribute('data-theme', dark ? 'dark' : 'light');
+        root.style.colorScheme = dark ? 'dark' : 'light';
+        root.style.backgroundColor = dark ? '#161616' : '#edeff2';
+      })();
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    <div class="app-shell">
+      <nav class="menubar" id="menubar">
+        <!-- The lockup from brand/logo.svg, inlined by app.js. It is the app name in the top bar;
+             inlined rather than an <img> so the wordmark gets IBM Plex Sans and the stroke can
+             inherit currentColor for light/dark. -->
+        <span class="app-logo" id="app-logo" role="img" aria-label="Gosset"></span>
+        <div class="menu" data-menu="file">
+          <button type="button" class="menu-trigger">File</button>
+          <div class="menu-dropdown">
+            <div class="submenu-host">
+              <button type="button" class="menu-item menu-item-submenu" aria-haspopup="true">
+                <span class="mi-label">New</span><span class="mi-arrow" aria-hidden="true">&rsaquo;</span>
+              </button>
+              <div class="menu-dropdown submenu">
+                <button type="button" class="menu-item" data-action="new-worksheet" data-icon="new-worksheet" data-help="Adds an empty worksheet as a new tab and switches to it. The current worksheet stays open and unchanged.">
+                  <span class="mi-label">New Worksheet</span><span class="mi-key">Ctrl+N</span>
+                </button>
+                <button type="button" class="menu-item" data-action="new-project" data-icon="new-project" data-help="Closes every worksheet, result, constant and matrix and starts again from one blank worksheet.">
+                  <span class="mi-label">New Project</span><span class="mi-key">Ctrl+Shift+N</span>
+                </button>
+              </div>
+            </div>
+            <button type="button" class="menu-item" data-action="open" data-icon="open" data-help="Opens a data file (CSV, Excel, JSON or a Google Sheets link) into a new worksheet, or reopens a saved .gsp project.">
+              <span class="mi-label">Open&hellip;</span><span class="mi-key">Ctrl+O</span>
+            </button>
+            <div class="submenu-host">
+              <button type="button" class="menu-item menu-item-submenu" aria-haspopup="true">
+                <span class="mi-label">Recent</span><span class="mi-arrow" aria-hidden="true">&rsaquo;</span>
+              </button>
+              <div class="menu-dropdown submenu" id="recent-submenu"></div>
+            </div>
+            <div class="menu-separator"></div>
+            <div class="menu-group-label">Working session</div>
+            <button type="button" class="menu-item" data-action="save-project" data-icon="save-project" data-help="Writes the whole session to a .gsp file: every open worksheet, the fitted models, the constants, the matrices and the formatting rules.">
+              <span class="mi-label">Save Project</span><span class="mi-key">Ctrl+S</span>
+            </button>
+            <button type="button" class="menu-item" data-action="save-project-as" data-icon="save-project-as" data-help="Saves the project under a new file name, leaving the previously saved file as it was.">
+              <span class="mi-label">Save Project As&hellip;</span><span class="mi-key"></span>
+            </button>
+            <div class="menu-separator"></div>
+            <div class="menu-group-label">Shareable document</div>
+            <button type="button" class="menu-item" data-action="export-report" data-icon="export-report" data-help="Builds a shareable PDF, Word, Excel or Markdown document from the results of this session, charts included." data-needs="At least one analysis run this session.">
+              <span class="mi-label">Export Report&hellip;</span><span class="mi-key">PDF / Word / Excel</span>
+            </button>
+            <div class="menu-separator"></div>
+            <button type="button" class="menu-item" data-action="print" data-icon="print" data-help="Prints the focused window, or the worksheet if none is focused. Printing always uses light colours, whatever the screen theme is.">
+              <span class="mi-label">Print&hellip;</span><span class="mi-key">Ctrl+P</span>
+            </button>
+            <div class="menu-separator"></div>
+            <button type="button" class="menu-item" data-action="project-description" data-icon="project-description" data-help="Records a project name and notes, which are carried into the header of an exported report.">
+              <span class="mi-label">Project Description&hellip;</span><span class="mi-key"></span>
+            </button>
+            <button type="button" class="menu-item" data-action="options" data-icon="options" data-help="Sets decimal places in results, the default significance level, motion, the menu help card and the theme.">
+              <span class="mi-label">Options&hellip;</span><span class="mi-key"></span>
+            </button>
+            <div class="menu-separator"></div>
+            <button type="button" class="menu-item" data-action="exit" data-icon="exit" data-help="Returns the app to a single blank worksheet and discards this session. Save the project first if the results matter.">
+              <span class="mi-label">Exit</span><span class="mi-key"></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="menu" data-menu="edit">
+          <button type="button" class="menu-trigger">Edit</button>
+          <div class="menu-dropdown">
+            <button type="button" class="menu-item" data-action="undo" data-icon="undo" data-help="Reverses the last change to the active worksheet. History is per worksheet, so switching tabs does not mix the two." data-needs="A change made to this worksheet.">
+              <span class="mi-label">Undo</span><span class="mi-key">Ctrl+Z</span>
+            </button>
+            <button type="button" class="menu-item" data-action="redo" data-icon="redo" data-help="Reapplies the change that was most recently undone." data-needs="A change that has been undone.">
+              <span class="mi-label">Redo</span><span class="mi-key">Ctrl+Y</span>
+            </button>
+            <div class="menu-separator"></div>
+            <button type="button" class="menu-item" data-action="clear" data-icon="clear" data-help="Empties the selected cells and leaves them in place, so the rows and columns around them do not move." data-needs="A cell or range selected in the worksheet.">
+              <span class="mi-label">Clear</span><span class="mi-key">Del</span>
+            </button>
+            <button type="button" class="menu-item" data-action="delete" data-icon="delete" data-help="Removes whole rows or whole columns and closes the gap. Unlike Clear, the cells themselves go, not just their contents." data-needs="Rows or columns selected in the worksheet.">
+              <span class="mi-label">Delete</span><span class="mi-key"></span>
+            </button>
+            <div class="menu-separator"></div>
+            <button type="button" class="menu-item" data-action="copy" data-icon="copy" data-help="Copies the selected cells to the clipboard, tab-separated, ready to paste into a spreadsheet." data-needs="A cell or range selected in the worksheet.">
+              <span class="mi-label">Copy</span><span class="mi-key">Ctrl+C</span>
+            </button>
+            <button type="button" class="menu-item" data-action="cut" data-icon="cut" data-help="Copies the selected cells to the clipboard and then empties them." data-needs="A cell or range selected in the worksheet.">
+              <span class="mi-label">Cut</span><span class="mi-key">Ctrl+X</span>
+            </button>
+            <button type="button" class="menu-item" data-action="paste" data-icon="paste" data-help="Pastes tab- or comma-separated clipboard text into the worksheet starting at the selected cell, widening a column's data type if the new values need it." data-needs="A cell selected as the top-left corner.">
+              <span class="mi-label">Paste</span><span class="mi-key">Ctrl+V</span>
+            </button>
+            <button type="button" class="menu-item" data-action="select-all" data-icon="select-all" data-help="Selects every cell in the active worksheet.">
+              <span class="mi-label">Select All</span><span class="mi-key">Ctrl+A</span>
+            </button>
+            <div class="menu-separator"></div>
+            <button type="button" class="menu-item" data-action="edit-last-dialog" data-icon="edit-last-dialog" data-help="Reopens the dialog that was run most recently, still filled in with the settings it was run with, so one input can be changed and it rerun." data-needs="A dialog run earlier in this session.">
+              <span class="mi-label">Edit Last Dialog</span><span class="mi-key">Ctrl+E</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="menu" data-menu="data">
+          <button type="button" class="menu-trigger">Data</button>
+          <div class="menu-dropdown">
+            <!-- generated from dataMenuConfig.js by menu.js, in Minitab's own order -->
+          </div>
+        </div>
+
+        <div class="menu" data-menu="calc">
+          <button type="button" class="menu-trigger">Calc</button>
+          <div class="menu-dropdown">
+            <!-- generated from calcConfig.js by menu.js; the Random Data and Probability
+                 Distributions submenus are built from the catalogue the backend serves -->
+          </div>
+        </div>
+
+        <div class="menu" data-menu="stat">
+          <button type="button" class="menu-trigger">Stat</button>
+          <div class="menu-dropdown">
+            <!-- generated from STAT_MENU in analysisConfig.js by menu.js -->
+          </div>
+        </div>
+
+        <div class="menu" data-menu="graph">
+          <button type="button" class="menu-trigger">Graph</button>
+          <div class="menu-dropdown">
+            <!-- items are generated from charts/graphConfig.js by graphs.js -->
+          </div>
+        </div>
+
+        <div class="menu" data-menu="window">
+          <button type="button" class="menu-trigger">Window</button>
+          <div class="menu-dropdown">
+            <button type="button" class="menu-item" data-action="chat" data-icon="assistant" data-help="Opens the Assistant, which turns a plain-language question into an analysis of the active worksheet."><span class="mi-label">Assistant</span></button>
+            <div class="menu-separator"></div>
+            <button type="button" class="menu-item" data-action="cascade" data-icon="cascade" data-help="Arranges every open window in a stepped stack so that all of their title bars stay visible."><span class="mi-label">Cascade windows</span></button>
+            <button type="button" class="menu-item" data-action="close-all" data-icon="close-all-windows" data-help="Closes every open form and result window at once. The worksheet, its tabs and the Session Window are untouched."><span class="mi-label">Close all windows</span></button>
+            <button type="button" class="menu-item" data-action="toggle-session" data-icon="session-window" data-help="Hides or shows the Session Window, the running log of everything run this session."><span class="mi-label">Hide Session Window</span></button>
+            <button type="button" class="menu-item" data-action="report" data-icon="report" data-help="Opens the Report pane: the blocks staged for a curated report, in the order they will export." data-needs="Blocks sent over from a result block&#39;s chevron menu."><span class="mi-label">Report</span></button>
+            <div class="menu-separator"></div>
+            <!-- A dev view of icons/registry.js: the fastest way to spot a style outlier and to
+                 check the whole set in both themes. Also reachable at #icons. -->
+            <button type="button" class="menu-item" data-action="icon-gallery" data-icon="icon-gallery" data-help="Developer view: the whole menu icon set in one grid, with names, for checking it in both themes."><span class="mi-label">Icon Gallery</span></button>
+          </div>
+        </div>
+
+        <div class="menu" data-menu="help">
+          <button type="button" class="menu-trigger">Help</button>
+          <div class="menu-dropdown">
+            <button type="button" class="menu-item" data-action="about" data-icon="about" data-help="Shows the version, the statistician the app is named for, and what it is built on."><span class="mi-label">About Gosset&hellip;</span></button>
+          </div>
+        </div>
+
+        <!-- Filled in by themeMode.mountToggle(). Sits at the far right of the bar, ahead of the
+             dataset chip; it carries the margin-left:auto so it stays there when the chip is
+             hidden. -->
+        <button type="button" id="theme-toggle"></button>
+
+        <div class="menubar-status" id="menubar-status" hidden>
+          <span class="status-source" id="status-source"></span>
+          <span class="status-meta" id="status-meta"></span>
+        </div>
+      </nav>
+
+      <div class="stage" id="stage">
+        <div class="worksheet-layer" id="worksheet-layer">
+          <div class="worksheet-head">
+            <span class="worksheet-head-title" id="worksheet-head-title">Worksheet</span>
+            <span class="worksheet-head-meta" id="worksheet-meta"></span>
+            <button type="button" class="btn btn-quiet btn-sm" id="worksheet-import-btn">Import file</button>
+          </div>
+          <p class="error worksheet-error" id="worksheet-error" hidden></p>
+          <div class="worksheet-scroll" id="worksheet-scroll">
+            <!-- Replaced by the grid on first render. If it is still here, the page's scripts never
+                 ran — almost always because the backend that serves them is not running. -->
+            <p class="boot-hint">
+              Starting&hellip;
+              <br />
+              If this message stays, the backend server is not running. Start it with
+              <code>LaunchBackend.bat</code> in the project folder, then reload this page.
+            </p>
+          </div>
+
+          <!-- One tab per open worksheet, Minitab-style. Filled in by worksheetTabs.js; clicking a
+               tab sets the app-wide active dataset, so every dialog and the Assistant follow it. -->
+          <div class="worksheet-tabs" id="worksheet-tabs" role="tablist" aria-label="Worksheets"></div>
+        </div>
+
+        <div class="window-layer" id="window-layer"></div>
+      </div>
+
+      <div class="taskbar" id="taskbar">
+        <span class="taskbar-label">Windows</span>
+        <div class="taskbar-tabs" id="taskbar-tabs"></div>
+        <span class="taskbar-empty" id="taskbar-empty">None open</span>
+      </div>
+
+      <section class="session-window" id="session-window">
+        <div class="session-window-resize-handle" id="session-resize-handle"></div>
+        <div class="session-window-header">
+          <span class="session-window-title">Session Window</span>
+          <button type="button" class="btn btn-quiet btn-sm" id="session-collapse-btn">Collapse</button>
+        </div>
+        <div class="session-window-body" id="session-window-body"></div>
+      </section>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <!-- Chart.js extensions, loaded after the core bundle so they can self-register. Plotly is NOT
+         here: it is fetched on demand by the 3D/contour windows only (see charts/plotly.js). -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@sgratzl/chartjs-chart-boxplot@4.4.4/build/index.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.1/dist/chartjs-chart-matrix.min.js"></script>
+    <!-- Zoom/pan for File > Options > "Interactive charts". Unlike the two above it does not
+         self-register: charts/theme.js registers the ChartZoom global centrally, and reports the
+         script missing rather than failing if the CDN is unreachable. -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+    <script type="module" src="/app.js"></script>
   </body>
 </html>

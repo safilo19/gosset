@@ -1,0 +1,27 @@
+{
+  "name": "gosset",
+  "productName": "Gosset",
+  "version": "1.0.0",
+  "description": "Gosset — a statistical analysis workbench",
+  "license": "SEE LICENSE IN ../LICENSE",
+  "private": true,
+  "main": "src/main.js",
+  "type": "commonjs",
+  "scripts": {
+    "stamp": "node scripts/stamp-version.mjs",
+    "icons": "node scripts/build-icons.mjs",
+    "build:sidecar": "node scripts/build-sidecar.mjs",
+    "start": "npm run stamp && electron .",
+    "dev": "npm run stamp && electron . --dev",
+    "prebuild": "npm run stamp && npm run icons",
+    "build": "npm run build:sidecar && electron-builder --config electron-builder.config.cjs",
+    "pack": "electron-builder --config electron-builder.config.cjs --dir"
+  },
+  "devDependencies": {
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8"
+  },
+  "allowScripts": {
+    "electron@33.4.11": true
+  }
+}

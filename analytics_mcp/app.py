@@ -3,7 +3,7 @@
 from mcp.server.fastmcp import FastMCP
 
 mcp = FastMCP(
-    "Personal Data Analysis & BI Toolkit",
+    "Gosset",
     instructions=(
         "Phase 1 tools for loading and exploring your own datasets (CSV, Excel, or a public "
         "Google Sheet): load_dataset, list_datasets, describe_dataset, compute_correlation. "

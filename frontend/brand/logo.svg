@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="2 8.2 85.5 21.6" width="85.5" height="21.6" fill="none" role="img" aria-label="Gosset">
+  <!--
+    The horizontal lockup: the mark from mark.svg plus the "Gosset" wordmark.
+
+    Construction:
+      mark       scaled 0.72 (23.04 wide) and placed so its CROSSBAR lands exactly on the wordmark's
+                 baseline at y = 21. markTop = 21 - 17.4 x 0.72 = 8.47. The bowl then drops below the
+                 baseline like a descender, which is what keeps the lockup from reading top-heavy.
+      stroke     2 / 0.72 = 2.78 inside the scaled group, so the rendered stroke is still 2 units.
+      gap        9 units between the mark's box and the wordmark's left edge.
+      wordmark   IBM Plex Sans SemiBold (600), 17.5, letter-spacing -0.015em (slightly tight, per the
+                 house type). Measured width 54.4, so the ink ends at 32.04 + 54.4 = 86.44.
+      viewBox    trimmed to the INK, not to the construction grid: x 2..87.5, y 8.2..29.8. The mark's
+                 own 32-unit box leaves 8.5 units of dead air above the lockup once it is dropped to
+                 the baseline, and a viewBox that includes it makes the whole logo render undersized
+                 at any given CSS height — the mark ends up ~14px inside a 20px box.
+
+    IMPORTANT: the wordmark is live <text>, not outlines, so it renders in IBM Plex Sans only where
+    that font is available. INLINE this file into the document (fetch + innerHTML, as app.js does for
+    the top bar) rather than referencing it from an <img> — an <img> gets no access to the page's
+    webfont and would fall back to a system sans. Outlines were the alternative and were rejected:
+    live text keeps the file editable and keeps one font source of truth.
+
+    Colour: both the mark and the wordmark use currentColor, so the lockup follows the surrounding
+    text colour in light and dark. For the accent treatment set `color` on an ancestor.
+  -->
+  <g transform="translate(0 8.47) scale(0.72)">
+    <path d="M8.4 17.4C11.26 17.4 11.52 12 14.9 12C18.28 12 18.54 17.4 21.4 17.4L27.41 17.4A11.5 11.5 0 1 1 23.7 7.45"
+          stroke="currentColor" stroke-width="2.78" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
+  <text x="32.04" y="21" font-family="'IBM Plex Sans', system-ui, sans-serif" font-weight="600" font-size="17.5"
+        letter-spacing="-0.015em" fill="currentColor" stroke="none">Gosset</text>
+</svg>

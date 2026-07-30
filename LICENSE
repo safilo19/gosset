@@ -1,0 +1,93 @@
+Gosset — Source-Available License
+=================================
+
+Copyright (c) 2026 Safi. All rights reserved.
+
+This software is source-available, not open source. The source code is published so
+that it can be read, audited, learned from and built; it is not placed in the public
+domain and no open-source license is granted.
+
+
+1. PERMITTED USE
+
+You may, free of charge:
+
+  a. view, read and study the source code;
+  b. clone or download the repository and build the software from source;
+  c. run the software, in its official or self-built form, for your own personal,
+     internal, academic or educational purposes;
+  d. modify the source code for your own personal or internal use;
+  e. submit contributions back to the project (see section 5).
+
+
+2. RESTRICTIONS
+
+Except as expressly permitted above, you may NOT, without prior written permission
+from the copyright holder:
+
+  a. redistribute this software or any derivative of it, in source or compiled form,
+     whether modified or unmodified, and whether for a fee or free of charge;
+  b. publish, sublicense, sell, rent, lease or otherwise commercially exploit this
+     software or any derivative of it;
+  c. offer this software or any derivative of it to third parties as a hosted or
+     managed service;
+  d. remove, obscure or alter this license, the copyright notice, or the attribution
+     shown in the application's About window and in generated reports.
+
+
+3. NAME, LOGO AND BRAND
+
+The name "Gosset", the Gosset wordmark, and the Gosset "G-mark" (the geometric G whose
+crossbar is a t-distribution, in frontend/brand/) are the property of the copyright
+holder and are NOT licensed by this document.
+
+No permission granted here includes any right to use these in any way that suggests
+endorsement by, affiliation with, or origin from the copyright holder. This restriction
+survives any other permission granted above.
+
+
+4. THIRD-PARTY COMPONENTS
+
+This software depends on third-party libraries distributed under their own licenses,
+which continue to govern those components. Notably it redistributes five typefaces under
+the SIL Open Font License, whose full terms are included alongside them:
+
+  backend/report_engine/fonts/LICENSE-IBM-Plex.txt      (IBM Plex Sans, IBM Plex Mono)
+  backend/report_engine/fonts/LICENSE-Source-Serif.md   (Source Serif 4)
+
+Nothing in this license restricts your rights in those components under their own terms.
+
+
+5. CONTRIBUTIONS
+
+Contributions are welcome. By submitting a contribution (a pull request, patch or
+suggested change), you grant the copyright holder a perpetual, worldwide, irrevocable,
+royalty-free license to use, modify, relicense and distribute that contribution as part
+of this software.
+
+
+6. NO WARRANTY
+
+THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE AND NONINFRINGEMENT.
+
+This software performs statistical computation. Its results are not certified, validated
+or warranted for any regulatory, clinical, safety-critical, financial or legal purpose.
+You are responsible for verifying any result you rely on.
+
+
+7. LIABILITY
+
+IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
+IN CONNECTION WITH THIS SOFTWARE OR THE USE OR OTHER DEALINGS IN THIS SOFTWARE.
+
+
+8. TERMINATION
+
+Any breach of this license terminates the permissions granted by it automatically. Upon
+termination you must stop using and destroy your copies of the software.
+
+
+For permissions beyond this license, contact the copyright holder.

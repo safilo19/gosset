@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Gosset">
+  <!--
+    The Gosset mark: "the t in the G". A geometric capital G whose crossbar is a t-distribution —
+    a symmetric dome on a flat baseline whose right tail runs on and becomes the bar that meets the
+    bowl. One continuous path, so the letter and the curve are the same stroke.
+
+    Construction (viewBox 0 0 32 32, centre 16,16, bowl radius 11.5):
+      bar      y = 17.4   the baseline the distribution sits on, and the G's crossbar
+      dome     peak (14.9, 12) — deliberately SHALLOW: a t peaks lower than a normal, and a low
+               wide dome is also what lets the tails still read as a horizontal bar
+      tails    leave and rejoin the baseline horizontally at x = 8.4 and x = 21.4, so the eye infers
+               an axis and reads a distribution rather than a wave
+      run-out  from 21.4 the right tail continues flat to 27.41, where it meets the bowl
+      bowl     11.5 radius, terminating at 48 degrees above horizontal (23.7, 7.45); the gap between
+               that terminal and the bar is the G's aperture
+
+    Two things that look like details and are not:
+      - The cubic controls satisfy apex + tail < 1 (0.52 + 0.44). At or above 1 the second control
+        point of the rising cubic lands left of the first, the control polygon reverses, and the dome
+        grows a kink on its left shoulder.
+      - stroke="currentColor" only. The mark inherits the surrounding text colour, which is what
+        makes it correct in light and dark with no second file and no JavaScript on a theme switch.
+        For the accent treatment set `color`, never a stroke attribute here.
+  -->
+  <path d="M8.4 17.4C11.26 17.4 11.52 12 14.9 12C18.28 12 18.54 17.4 21.4 17.4L27.41 17.4A11.5 11.5 0 1 1 23.7 7.45" />
+</svg>

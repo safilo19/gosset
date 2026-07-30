@@ -362,18 +362,60 @@ class AnalysisToInclude(BaseModel):
             "(e.g. compute_correlation's or run_regression's output)."
         ),
     )
+    allow_generated_chart: bool = Field(
+        True,
+        description=(
+            "Whether the report may render a chart from `data` when no chart image is supplied. "
+            "Set False when this section is a single output block, so a table exports as a table only."
+        ),
+    )
+    full_tables: bool = Field(
+        False,
+        description=(
+            "Whether a long table in this section exports in full. Off by default: a document truncates "
+            "past ~25 rows and notes how many were left out, so one long table cannot bury the findings "
+            "after it across several pages. Set True to include every row deliberately."
+        ),
+    )
     chart_path: str | None = Field(
         None, description="Optional chart_path from a prior generate_chart call, to embed alongside this section."
     )
+    chart_image_base64: str | None = Field(
+        None,
+        description=(
+            "Optional PNG (data URL or bare base64) of the chart as it was rendered on screen. Takes precedence "
+            "over chart_path, and lets any chart type appear in a report without a server-side renderer."
+        ),
+    )
+    analysis_id: str = Field(
+        "",
+        description=(
+            "Which analysis produced this section (e.g. 'normality', 'fit_model'). The report engine uses it to "
+            "decide a verdict badge's polarity: a significant NORMALITY test is bad news, a significant t-test is "
+            "a finding, and the same p-value cannot say both without knowing the test."
+        ),
+    )
+    note: str = Field(
+        "",
+        description=(
+            "Commentary written by the user in the Report pane rather than produced by an analysis. A section with "
+            "a note renders as prose between the result cards and gets no heading, badge or table."
+        ),
+    )
+    columns: str = Field("", description="The input columns, for the card's metadata line (e.g. 'yield_kg, machine').")
+    timestamp: str = Field("", description="When the analysis was run, already formatted for display.")
 
 
 class ExportReportInput(BaseModel):
     dataset_id: str = Field(..., description="ID of the dataset these analyses relate to (used for labeling only).", examples=["ds_1"])
-    format: Literal["xlsx", "markdown", "both"] = Field("both", description="Output format(s) to generate.")
+    format: Literal["xlsx", "markdown", "docx", "pdf", "both"] = Field(
+        "both", description="Output format to generate: a single format, or 'both' for markdown + xlsx."
+    )
     analyses: list[AnalysisToInclude] = Field(..., min_length=1, description="Prior analysis results to include, in order.")
     report_name: str | None = Field(
         None, description="Optional base filename (without extension). Defaults to an auto-generated name."
     )
+    decimals: int = Field(3, ge=0, le=8, description="Decimal places used for fractional numbers in tables.")
 
 
 class ExportReportOutput(BaseModel):
@@ -382,3 +424,159 @@ class ExportReportOutput(BaseModel):
     files: list[str] = Field(..., description="Absolute paths to the generated report file(s), under the project's output/ folder.")
     sections_included: list[str]
     summary: str
+
+
+# ---------------------------------------------------------------------------
+# get_graph_data
+# ---------------------------------------------------------------------------
+
+
+class GetGraphDataInput(BaseModel):
+    dataset_id: str = Field(..., description="ID of a loaded dataset.", examples=["ds_1"])
+    graph_type: str = Field(
+        ...,
+        description=(
+            "Which graph's data to compute: scatter, bubble, line, area, bar, pie, time_series, histogram, boxplot, "
+            "heatmap, correlogram, binned_scatter, dotplot, individual_value, interval, ecdf, probability, "
+            "distribution, stem_leaf, matrix_plot, marginal, parallel_coords, contour, surface, scatter3d."
+        ),
+        examples=["histogram"],
+    )
+    columns: list[str] = Field(default_factory=list, description="Columns the graph needs, in the order it expects them (e.g. [x, y]).")
+    options: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Per-graph settings, e.g. {'bin_width': 100} for histogram, {'group_column': 'region'} for boxplot, or distribution parameters.",
+    )
+
+
+class GetGraphDataOutput(BaseModel):
+    dataset_id: str
+    graph_type: str
+    data: dict[str, Any] = Field(..., description="The computed series for that graph (binning, five-number stats, quantiles, grids, ...).")
+    summary: str
+
+
+# ---------------------------------------------------------------------------
+# run_decision_tree (Phase 6 — Predictive Analytics)
+# ---------------------------------------------------------------------------
+
+
+class RunDecisionTreeInput(BaseModel):
+    dataset_id: str = Field(..., description="ID of a previously loaded dataset, e.g. 'ds_1'.", examples=["ds_1"])
+    target: str = Field(..., description="Column to predict.", examples=["revenue"])
+    features: list[str] = Field(..., min_length=1, description="Numeric predictor columns.", examples=[["units", "discount_pct"]])
+    task_type: Literal["classification", "regression", "auto"] = Field(
+        "auto", description="'auto' inspects the target's dtype/cardinality and picks classification or regression."
+    )
+
+
+class FeatureImportance(BaseModel):
+    feature: str
+    importance: float
+
+
+class RunDecisionTreeOutput(BaseModel):
+    dataset_id: str
+    target: str
+    features: list[str]
+    task_type_used: Literal["classification", "regression"]
+    method_reason: str = Field(..., description="Plain-language reason auto-selection (or the requested task_type) was used.")
+    n_obs: int
+    metric_label: str = Field(..., description="'Accuracy' for classification, 'R²' for regression.")
+    metric_value: float
+    secondary_metric_label: str = Field(..., description="'F1 (weighted)' for classification, 'RMSE' for regression.")
+    secondary_metric_value: float
+    feature_importances: list[FeatureImportance]
+    tree_summary: str | None = Field(None, description="Plain-text view of the top 2 levels of splits (sklearn's export_text).")
+    summary: str
+
+
+# ---------------------------------------------------------------------------
+# run_random_forest (Phase 6 — Predictive Analytics)
+# ---------------------------------------------------------------------------
+
+
+class RunRandomForestInput(BaseModel):
+    dataset_id: str = Field(..., description="ID of a previously loaded dataset, e.g. 'ds_1'.", examples=["ds_1"])
+    target: str = Field(..., description="Column to predict.", examples=["revenue"])
+    features: list[str] = Field(..., min_length=1, description="Numeric predictor columns.", examples=[["units", "discount_pct"]])
+    task_type: Literal["classification", "regression", "auto"] = Field(
+        "auto", description="'auto' inspects the target's dtype/cardinality and picks classification or regression."
+    )
+
+
+class RunRandomForestOutput(BaseModel):
+    dataset_id: str
+    target: str
+    features: list[str]
+    task_type_used: Literal["classification", "regression"]
+    method_reason: str = Field(..., description="Plain-language reason auto-selection (or the requested task_type) was used.")
+    n_obs: int
+    metric_label: str = Field(..., description="'Accuracy' for classification, 'R²' for regression.")
+    metric_value: float
+    secondary_metric_label: str = Field(..., description="'F1 (weighted)' for classification, 'RMSE' for regression.")
+    secondary_metric_value: float
+    feature_importances: list[FeatureImportance]
+    summary: str
+
+
+# ---------------------------------------------------------------------------
+# run_gradient_boosting (Phase 6 — Predictive Analytics)
+# ---------------------------------------------------------------------------
+
+
+class RunGradientBoostingInput(BaseModel):
+    dataset_id: str = Field(..., description="ID of a previously loaded dataset, e.g. 'ds_1'.", examples=["ds_1"])
+    target: str = Field(..., description="Column to predict.", examples=["revenue"])
+    features: list[str] = Field(..., min_length=1, description="Numeric predictor columns.", examples=[["units", "discount_pct"]])
+    task_type: Literal["classification", "regression", "auto"] = Field(
+        "auto", description="'auto' inspects the target's dtype/cardinality and picks classification or regression."
+    )
+
+
+class RunGradientBoostingOutput(BaseModel):
+    dataset_id: str
+    target: str
+    features: list[str]
+    task_type_used: Literal["classification", "regression"]
+    method_reason: str = Field(..., description="Plain-language reason auto-selection (or the requested task_type) was used.")
+    n_obs: int
+    metric_label: str = Field(..., description="'Accuracy' for classification, 'R²' for regression.")
+    metric_value: float
+    secondary_metric_label: str = Field(..., description="'F1 (weighted)' for classification, 'RMSE' for regression.")
+    secondary_metric_value: float
+    feature_importances: list[FeatureImportance]
+    summary: str
+
+
+# ---------------------------------------------------------------------------
+# run_automl (Phase 6 — Predictive Analytics)
+# ---------------------------------------------------------------------------
+
+
+class RunAutoMLInput(BaseModel):
+    dataset_id: str = Field(..., description="ID of a previously loaded dataset, e.g. 'ds_1'.", examples=["ds_1"])
+    target: str = Field(..., description="Column to predict.", examples=["revenue"])
+    features: list[str] = Field(..., min_length=1, description="Numeric predictor columns.", examples=[["units", "discount_pct"]])
+    task_type: Literal["classification", "regression", "auto"] = Field(
+        "auto", description="'auto' inspects the target's dtype/cardinality and picks classification or regression."
+    )
+
+
+class ModelComparisonResult(BaseModel):
+    model: str
+    score: float
+
+
+class RunAutoMLOutput(BaseModel):
+    dataset_id: str
+    target: str
+    features: list[str]
+    task_type_used: Literal["classification", "regression"]
+    method_reason: str = Field(..., description="Plain-language reason auto-selection (or the requested task_type) was used.")
+    n_obs: int
+    metric_label: str = Field(..., description="'Accuracy' for classification, 'R²' for regression — same metric for every model tried.")
+    results: list[ModelComparisonResult] = Field(..., description="Every applicable model tried, ranked best-first by cross-validated score.")
+    best_model: str
+    best_score: float
+    summary: str = Field(..., description="Plain-language recommendation of the best model and why.")

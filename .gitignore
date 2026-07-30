@@ -7,11 +7,43 @@ __pycache__/
 # Generated report output (regenerated on demand, not source)
 output/
 
-# Frontend (frontend/ has its own .gitignore for node_modules/dist; this covers env files)
+# Node / Electron
+node_modules/
+npm-debug.log*
+
+# Build artifacts.
+#
+# The PyInstaller bundle and the installer are written OUTSIDE the repository by default
+# (%LOCALAPPDATA%\gosset-build — see desktop/scripts/paths.mjs for why), so they need no entry here.
+# These cover the older in-tree locations and anything produced by running the tools by hand.
+dist/
+build/
+desktop/dist/
+desktop/dist-sidecar/
+desktop/build-sidecar/
+desktop/release/
+
+# Generated Windows icons. Derived from frontend/brand/mark.svg by
+# desktop/scripts/make_app_icons.py, which `npm run icons` (and the release workflow) runs before
+# every build — so they are reproducible rather than source.
+desktop/build/*.ico
+desktop/build/*.png
+
+# Frontend (frontend/ has no build step; this covers env files)
 frontend/.env
 frontend/.env.local
 frontend/.env.*.local
 
+# Saved projects, if someone works inside the repo directory
+*.gsp
+*.baproj
+
+# Claude Code's per-machine permission allowlist. Personal and path-specific (it names absolute
+# paths on one developer's machine), so it is not shared. .claude/skills/ IS committed — those are
+# project conventions.
+.claude/settings.local.json
+
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
