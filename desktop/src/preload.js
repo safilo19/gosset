@@ -98,9 +98,32 @@ contextBridge.exposeInMainWorld('gosset', {
       ipcRenderer.on('gosset:update-available', (_e, p) => fn(p));
       ipcRenderer.send('gosset:updater-ready');
     },
+
     onNotAvailable: (fn) => ipcRenderer.on('gosset:update-not-available', (_e, p) => fn(p)),
     onProgress: (fn) => ipcRenderer.on('gosset:update-progress', (_e, p) => fn(p)),
     onDownloaded: (fn) => ipcRenderer.on('gosset:update-downloaded', (_e, p) => fn(p)),
     onError: (fn) => ipcRenderer.on('gosset:update-error', (_e, p) => fn(p)),
+  },
+
+  /**
+   * Google sign-in, identity only.
+   *
+   * Deliberately narrow: the renderer can start a sign-in, end one, and ask who is signed in. It can
+   * never obtain a token — every credential stays in the main process (see desktop/src/auth.js), so a
+   * page loaded here has nothing to steal. `state()` is the single shape all of these resolve to, so
+   * the UI has one way to render itself.
+   */
+  auth: {
+    /** `{configured, signedIn, profile: {name, email, picture, provider, signedInAt} | null}` */
+    state: () => ipcRenderer.invoke('gosset:auth-state'),
+
+    /** Opens the SYSTEM browser. Resolves `{ok, state}` or `{ok: false, error}` — cancelling is not an error. */
+    signIn: () => ipcRenderer.invoke('gosset:auth-sign-in'),
+
+    /** Forgets the local session. Does not revoke the Google grant — that is the user's to remove. */
+    signOut: () => ipcRenderer.invoke('gosset:auth-sign-out'),
+
+    /** Opportunistic validity check; clears a revoked session but never signs you out for being offline. */
+    refresh: () => ipcRenderer.invoke('gosset:auth-refresh'),
   },
 });

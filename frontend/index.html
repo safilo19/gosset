@@ -190,6 +190,8 @@
             <button type="button" class="menu-item" data-action="whats-new" data-icon="about" data-help="Lists what changed in this version of Gosset, in plain language." data-needs="Nothing — it reads the release notes bundled with this build."><span class="mi-label">What&rsquo;s New&hellip;</span></button>
             <button type="button" class="menu-item" data-action="check-updates" data-icon="check-updates" data-help="Asks GitHub whether a newer version of Gosset has been released." data-needs="An internet connection. Nothing is downloaded without asking first."><span class="mi-label">Check for Updates&hellip;</span></button>
             <div class="menu-separator"></div>
+            <button type="button" class="menu-item" data-action="account" data-icon="account" data-help="Shows who is signed in, and lets you sign in or out. Signing in only puts your name on the app and on report covers." data-needs="Nothing — Gosset works fully without an account."><span class="mi-label">Account&hellip;</span></button>
+            <div class="menu-separator"></div>
             <button type="button" class="menu-item" data-action="about" data-icon="about" data-help="Shows the version, the statistician the app is named for, and what it is built on."><span class="mi-label">About Gosset&hellip;</span></button>
           </div>
         </div>
@@ -198,6 +200,12 @@
              dataset chip; it carries the margin-left:auto so it stays there when the chip is
              hidden. -->
         <button type="button" id="theme-toggle"></button>
+
+        <!-- Filled in by account.js, and only in the desktop app: signing in needs a system browser
+             and the OS keychain, so in a browser this stays hidden and the app is simply account-less.
+             Sits before the theme switch's auto-margin partner so it groups with the right-hand
+             controls rather than drifting into the menu labels. -->
+        <span class="account-slot" id="account-slot" hidden></span>
 
         <div class="menubar-status" id="menubar-status" hidden>
           <span class="status-source" id="status-source"></span>

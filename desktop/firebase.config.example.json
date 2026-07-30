@@ -1,0 +1,21 @@
+{
+  "_comment": [
+    "Copy this file to firebase.config.json in the same directory and fill in your own values.",
+    "firebase.config.json is gitignored: it identifies YOUR Firebase project, and a fork should use its own.",
+    "See docs/FIREBASE_SETUP.md for where each value comes from.",
+    "",
+    "None of these are secrets. A Firebase web apiKey and an OAuth clientId are public identifiers —",
+    "they appear in every shipped client and are meant to. What protects the project is the Firebase",
+    "security rules and the fact that this OAuth client can only redirect to loopback addresses.",
+    "clientSecret is optional: Google issues one for 'Desktop app' clients and explicitly does not",
+    "treat it as confidential, and this app uses PKCE instead, so leaving it empty is fine.",
+    "",
+    "Gosset also reads GOSSET_FIREBASE_API_KEY / _CLIENT_ID / _CLIENT_SECRET / _PROJECT_ID from the",
+    "environment, which is how a CI build can configure itself without a file."
+  ],
+  "apiKey": "AIzaSy…your-web-api-key…",
+  "authDomain": "your-project.firebaseapp.com",
+  "projectId": "your-project",
+  "clientId": "000000000000-xxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com",
+  "clientSecret": ""
+}

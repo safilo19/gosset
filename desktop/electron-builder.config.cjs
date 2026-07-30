@@ -48,7 +48,10 @@ module.exports = {
   // Only the shell's own code. The frontend and the Python backend both travel inside the sidecar
   // bundle (the frontend is SERVED by FastAPI, not loaded from disk by Electron), so packaging them
   // here as well would ship two copies and let them disagree.
-  files: ['src/**/*', 'package.json'],
+  // firebase.config.json is optional and gitignored, so `!` guards against it being absent — without
+  // that, a build on a machine that has not configured sign-in fails on a missing file instead of
+  // producing an app whose Account panel simply says it is not set up.
+  files: ['src/**/*', 'package.json', 'firebase.config.json', '!firebase.config.example.json'],
 
   extraResources: [
     {

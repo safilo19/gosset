@@ -567,6 +567,9 @@ const WINDOW_ICONS = {
   'session-window': svg('<rect x="1.9" y="2.4" width="12.2" height="11.2" rx="1"/><path d="M1.9 8.9h12.2"/><path d="M4.1 10.9h4.4M4.1 12.4h6.4"/>'),
   // Help > About: the conventional info circle.
   about: svg(`<circle cx="8" cy="8" r="6.1"/><path d="M8 7.4v4.1"/>${dot(8, 4.9, 1)}`),
+  // Account. A head and shoulders — the one place a person is depicted, so it is drawn as an outline
+  // like every other icon rather than borrowed as a filled glyph.
+  account: svg('<circle cx="8" cy="5.6" r="2.7"/><path d="M2.9 13.9v-.6a5.1 5.1 0 0 1 10.2 0v.6"/>'),
   // Check for Updates. A circular arrow, NOT a downward arrow into a line: that reads as "download"
   // and would be a look-alike for export/save, which are three items away in the same menu bar. The
   // gap in the ring at the top-right is what the arrowhead sits in, so the two read as one stroke.

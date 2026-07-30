@@ -168,6 +168,9 @@ class ReportMeta:
     row_count: int | None = None
     column_count: int | None = None
     decimals: int = DEFAULT_DECIMALS
+    # Whoever is signed in, for the cover's byline. Empty is the normal case — Gosset needs no account —
+    # and every renderer must omit the line rather than print a label with nothing after it.
+    prepared_by: str = ""
 
     @property
     def dataset_label(self) -> str:
@@ -381,6 +384,7 @@ def _engine_meta(meta: ReportMeta, result_count: int = 0) -> report_builder.Repo
         row_count=meta.row_count,
         column_count=meta.column_count,
         decimals=meta.decimals,
+        prepared_by=meta.prepared_by,
         version=APP_VERSION,
     )
     engine_meta.result_count = result_count

@@ -28,6 +28,7 @@ import * as iconGallery from './icons/gallery.js';
 import * as menuHelp from './menuHelp.js';
 import * as brand from './brand/brand.js';
 import * as desktop from './desktopBridge.js';
+import * as account from './account.js';
 import * as updates from './updates.js';
 import * as whatsNew from './whatsNew.js';
 import * as blockMenu from './blockMenu.js';
@@ -1101,6 +1102,9 @@ function openExportDialog({ scope: initialScope = 'session' } = {}) {
             analyses,
             report_name: safeFileName(nameInput.value) || null,
             decimals: settings.get().decimals,
+            // The signed-in name, for the cover's byline. Empty when signed out, and the document
+            // renderers omit the line entirely rather than printing "Prepared by" with nothing after it.
+            prepared_by: account.displayName() || null,
           });
           close();
           addResult('export', `${format.name} report (${analyses.length} section${analyses.length === 1 ? '' : 's'})`, data);
@@ -2747,6 +2751,7 @@ const ACTIONS = {
   report: () => reportPane.open(),
   // Help
   about: openAboutWindow,
+  account: () => account.openAccountWindow(),
   'whats-new': () => whatsNew.show({ wm }),
   // A user-initiated check, which is the only kind allowed to report that it failed or found nothing.
   'check-updates': () => updates.checkNow(),
@@ -3119,6 +3124,10 @@ apiClient
       rememberVersion: (v) => settings.rememberRunVersion(v),
       log: (text) => logSessionLine(text),
     });
+
+    // Draws the menu-bar account button from the session cached on disk, so someone already signed in
+    // sees their name immediately and with no network. Awaited nothing: it is display only.
+    account.init({ wm, log: (text) => logSessionLine(text) });
 
     updates.init({
       wm,

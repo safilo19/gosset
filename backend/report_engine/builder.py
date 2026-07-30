@@ -64,6 +64,9 @@ class ReportMeta:
     decimals: int = 3
     version: str = "1.0.0-dev"
     generated_at: datetime = field(default_factory=datetime.now)
+    # Whoever prepared the report, when the app knows. The engine stays statistics-free and brand-free
+    # about this: it is handed a string and prints it, and an empty string prints nothing at all.
+    prepared_by: str = ""
 
     # Filled in by render_pdf once the note/card split is known, so the cover can say "5 results".
     result_count: int = 0
@@ -79,6 +82,10 @@ class ReportMeta:
         if self.row_count is not None and self.column_count is not None:
             bits.append(f"{self.row_count} rows × {self.column_count} columns")
         bits.append(self.generated_at.strftime("generated %d %B %Y at %H:%M"))
+        # Last, and only when there is a name: Gosset needs no account, so an unsigned report is the
+        # normal case and must not carry a dangling "prepared by".
+        if self.prepared_by.strip():
+            bits.append(f"prepared by {self.prepared_by.strip()}")
         return "  ·  ".join(bits)
 
 

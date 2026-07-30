@@ -369,6 +369,14 @@ class ReportRequest(BaseModel):
         le=8,
         description="Decimal places for fractional numbers, so the report matches what File > Options shows on screen.",
     )
+    prepared_by: str | None = Field(
+        None,
+        max_length=120,
+        description=(
+            "Name for the cover's byline, from whoever is signed in. Null or empty when nobody is, in "
+            "which case the byline is omitted entirely rather than left blank."
+        ),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -903,6 +911,7 @@ def export_report(body: ReportRequest) -> ExportReportOutput:
         row_count=len(dataset.df),
         column_count=len(dataset.df.columns),
         decimals=body.decimals,
+        prepared_by=(body.prepared_by or "").strip(),
     )
     paths = reports_core.build_report(meta, body.format, sections, stem)
     summary_text = reports_core.summarize_export(dataset.dataset_id, [a.title for a in body.analyses], paths)

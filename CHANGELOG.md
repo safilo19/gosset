@@ -13,6 +13,13 @@ workflow copies that same section into the GitHub Release body and the app's "Wh
 these bullets are read by users three times over — write them accordingly. Three to eight per release.
 
 <!-- next-release -->
+## [1.1.0] - 2026-07-30
+
+### Added
+
+- Optional Google sign-in. Signing in shows your name and picture in the menu bar and puts your name on the cover of reports you export. That is all it does: nothing is uploaded, no feature requires it, and Gosset works exactly the same signed out.
+- Help > Account shows who is signed in and lets you sign in or out.
+
 ## [1.0.8] - 2026-07-30
 
 ### Fixed
@@ -95,6 +102,7 @@ Gosset's first desktop release.
   the published requirements.
 - Reports are now written to a per-user folder instead of the application directory.
 
+[1.1.0]: https://github.com/safilo19/personal-analytics-mcp/releases/tag/v1.1.0
 [1.0.8]: https://github.com/safilo19/personal-analytics-mcp/releases/tag/v1.0.8
 [1.0.7]: https://github.com/safilo19/personal-analytics-mcp/releases/tag/v1.0.7
 [1.0.6]: https://github.com/safilo19/personal-analytics-mcp/releases/tag/v1.0.6

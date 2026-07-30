@@ -26,6 +26,7 @@ const { app, BrowserWindow, dialog, ipcMain, Menu, screen, shell } = require('el
 const { existsSync, readFileSync, writeFileSync } = require('node:fs');
 const { basename, dirname, join, resolve } = require('node:path');
 
+const { Auth } = require('./auth');
 const { log } = require('./log');
 const { Sidecar } = require('./sidecar');
 const { Updater } = require('./updater');
@@ -43,6 +44,8 @@ let mainWindow = null;
 let sidecar = null;
 /** @type {Updater | null} */
 let updater = null;
+/** @type {Auth | null} */
+let auth = null;
 
 /**
  * The renderer's "Check for updates automatically" preference, mirrored here.
@@ -323,6 +326,35 @@ function registerIpc() {
     supported: Boolean(updater && updater.supported),
     releasesUrl: `${REPO_URL}/releases`,
   }));
+
+  // ---------------------------------------------------------------------------
+  // account
+  // ---------------------------------------------------------------------------
+
+  // Every one of these returns the same shape — `auth.state()` — so the renderer has one way to
+  // render itself and never has to reconcile a reply with what it already believed.
+  ipcMain.handle('gosset:auth-state', () => (auth ? auth.state() : { configured: false, signedIn: false, profile: null }));
+
+  ipcMain.handle('gosset:auth-sign-in', async () => {
+    if (!auth) return { ok: false, error: 'Sign-in is unavailable in this build.' };
+    try {
+      return { ok: true, state: await auth.signIn() };
+    } catch (err) {
+      // Returned rather than thrown: a cancelled sign-in is an ordinary outcome, and an IPC rejection
+      // would surface in the renderer as an opaque "Error invoking remote method".
+      return { ok: false, error: String((err && err.message) || err) };
+    }
+  });
+
+  ipcMain.handle('gosset:auth-sign-out', async () => {
+    if (!auth) return { configured: false, signedIn: false, profile: null };
+    return auth.signOut();
+  });
+
+  ipcMain.handle('gosset:auth-refresh', async () => {
+    if (!auth) return { configured: false, signedIn: false, profile: null };
+    return auth.refresh();
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -341,6 +373,12 @@ async function main() {
   if (pendingOpenPath) log.info(`launched with project: ${pendingOpenPath}`);
 
   await app.whenReady();
+
+  // Constructed before the window so the account button can be drawn from a restored session on the
+  // first paint, with no network and no flash of "Sign in" for someone who already is.
+  auth = new Auth({ userDataDir, appPath: app.getAppPath() });
+  log.info(`auth: ${auth.configured ? 'configured' : 'not configured'}; signed in: ${auth.state().signedIn}`);
+
   registerIpc();
 
   sidecar = new Sidecar({

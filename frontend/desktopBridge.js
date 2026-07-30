@@ -75,3 +75,15 @@ export function updater() {
   const g = bridge();
   return g && g.updater ? g.updater : null;
 }
+
+/**
+ * Google sign-in, or null.
+ *
+ * Null in a browser, which is the feature detect the account UI hangs off — the sign-in flow needs a
+ * system browser and an OS keychain, neither of which a page can reach. Gosset is usable signed out by
+ * design, so its absence removes a button and nothing else.
+ */
+export function auth() {
+  const g = bridge();
+  return g && g.auth ? g.auth : null;
+}

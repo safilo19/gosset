@@ -8,7 +8,7 @@
 
 A desktop application for real statistical work — 239 procedures across Basic Statistics,
 Regression, ANOVA, Calc, Data and Graph — that runs entirely on your own machine.
-No account, no subscription, no network.
+No subscription. No account needed. Your data never leaves your machine.
 
 <sub>Named for William Sealy Gosset, who published the t-distribution as "Student" in 1908 —
 because his employer would not let him publish under his own name.</sub>
@@ -114,7 +114,18 @@ Start Menu entry, and registers `.gsp` files so double-clicking a project opens 
 > the same application.
 
 Everything runs locally — an ordinary Windows application with a bundled Python analysis engine on
-`127.0.0.1`. No telemetry, no network access, no account.
+`127.0.0.1`. No telemetry, and no account required.
+
+**The only two things that ever touch the network**, both optional and both explicit:
+
+- **Update checks**, which ask GitHub whether a newer release exists. Turn them off in
+  File > Options > Updates.
+- **Signing in with Google**, if you choose to and if the build has it configured. It puts your name in
+  the menu bar and on report covers — nothing else. Your data is never uploaded, no feature is gated
+  behind it, and the app is fully usable signed out. See
+  [docs/FIREBASE_SETUP.md](docs/FIREBASE_SETUP.md).
+
+Your worksheets, projects and reports stay on your machine either way.
 
 **Requirements:** Windows 10 or 11, 64-bit; about 700 MB on disk (the bundled scientific Python stack
 is most of that).
