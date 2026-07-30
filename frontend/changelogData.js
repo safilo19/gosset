@@ -11,6 +11,14 @@
 /** @type {{version: string, date: string, bullets: {group: string, text: string}[]}[]} newest first */
 export const RELEASES = [
   {
+    version: "1.0.3",
+    date: "2026-07-30",
+    bullets: [
+      { group: "Fixed", text: "Gosset no longer forgets your settings when it restarts. The theme, the options in File > Options and the recent-files list were all being reset on every launch." },
+      { group: "Fixed", text: "Because of that same problem, the \"What's new\" window could never appear after an update. It now does." },
+    ],
+  },
+  {
     version: "1.0.2",
     date: "2026-07-30",
     bullets: [
