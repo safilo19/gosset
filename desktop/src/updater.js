@@ -336,7 +336,20 @@ function normaliseNotes(notes) {
   const raw = Array.isArray(notes)
     ? notes.map((n) => (typeof n === 'string' ? n : `${n.version ? `## ${n.version}\n` : ''}${n.note || ''}`)).join('\n\n')
     : String(notes);
-  return raw
+
+  // Cut the release PAGE's trailing boilerplate before anything else.
+  //
+  // A GitHub release body is a page, not a notes list: release-notes.mjs appends the download and
+  // SmartScreen instructions after a horizontal rule. Without this cut, the app's update window listed
+  // "Download Gosset-Setup-1.0.5.exe below and run it" as though it were a release note — advice that
+  // is actively wrong inside an app that is about to do the download itself.
+  //
+  // The rule is matched in both forms because the provider may hand over HTML or markdown, and this
+  // runs before the tags are stripped — afterwards there would be nothing left to find.
+  const cut = raw.search(/<hr\b|^\s*(?:-{3,}|\*{3,}|_{3,})\s*$/m);
+  const body = cut === -1 ? raw : raw.slice(0, cut);
+
+  return body
     .replace(/<br\s*\/?>/gi, '\n')
     .replace(/<\/(p|li|h\d)>/gi, '\n')
     .replace(/<li>/gi, '- ')

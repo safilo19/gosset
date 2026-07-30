@@ -94,11 +94,13 @@ function notesFor(info) {
   if (fromChangelog.length) {
     return fromChangelog.flatMap((r) => r.bullets.map((b) => b.text));
   }
-  return (info.notes || '')
-    .split(/\r?\n/)
-    .map((line) => line.replace(/^\s*[-*]\s*/, '').trim())
-    .filter((line) => line && !line.startsWith('#'))
-    .slice(0, 8);
+  // The feed's notes are a rendered release body, so only the LIST ITEMS are notes — the rest is
+  // headings ("Gosset 1.0.5", "Changed") and prose, which listed as bullets read like nonsense.
+  // normaliseNotes in the main process turns <li> into "- ", so real items are identifiable.
+  const lines = (info.notes || '').split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  const items = lines.filter((l) => /^[-*]\s+/.test(l)).map((l) => l.replace(/^[-*]\s+/, ''));
+  // If the body had no list at all, fall back to its prose lines rather than showing nothing.
+  return (items.length ? items : lines.filter((l) => !l.startsWith('#'))).slice(0, 8);
 }
 
 function openUpdateWindow(info) {
