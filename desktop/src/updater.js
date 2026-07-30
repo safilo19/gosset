@@ -132,10 +132,15 @@ class Updater {
     // Also off: an update that installs itself the moment the user closes the window would replace the
     // app behind their back, and the "Restart to finish updating" step is what makes it visible.
     autoUpdater.autoInstallOnAppQuit = false;
+    // electron-updater's messages are mostly one useful line, but a failed HTTP request arrives as the
+    // ENTIRE response — status line, every header, and `set-cookie`. Logging that verbatim wrote GitHub
+    // session cookies into a plaintext file in the user's profile, and buried the actual error under
+    // 4 KB of headers. Observed by pointing the feed at a host that does not exist.
+    const terse = (m) => summariseUpdaterMessage(m);
     autoUpdater.logger = {
-      info: (m) => log.info(`[updater] ${m}`),
-      warn: (m) => log.info(`[updater] warn: ${m}`),
-      error: (m) => log.error(`[updater] ${m}`),
+      info: (m) => log.info(`[updater] ${terse(m)}`),
+      warn: (m) => log.info(`[updater] warn: ${terse(m)}`),
+      error: (m) => log.error(`[updater] ${terse(m)}`),
       debug: () => {},
     };
 
@@ -333,6 +338,22 @@ class Updater {
     setImmediate(() => updater.quitAndInstall(true, true));
     return true;
   }
+}
+
+/**
+ * One log line out of whatever electron-updater passed.
+ *
+ * A failed request is reported as the whole HTTP response, so this keeps the first line — which is
+ * where the actual reason is — strips any cookie or authorization header that survived, and caps the
+ * length. The full response is of no diagnostic use here and its cookies do not belong in a file.
+ */
+function summariseUpdaterMessage(message) {
+  const text = message instanceof Error ? message.message || String(message) : String(message);
+  const firstLine = text.split(/\r?\n/, 1)[0].trim();
+  const redacted = firstLine
+    .replace(/(set-cookie|cookie|authorization|x-amz-security-token)["'\s:=]+[^,;}]*/gi, '$1: [redacted]')
+    .replace(/(_gh_sess|_octo|logged_in)=[^;,\s]*/gi, '$1=[redacted]');
+  return redacted.length > 300 ? `${redacted.slice(0, 300)}…` : redacted;
 }
 
 /**
