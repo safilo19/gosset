@@ -174,6 +174,8 @@ class Updater {
           releaseDate: info.releaseDate || '',
           notes: normaliseNotes(info.releaseNotes),
           currentVersion: app.getVersion(),
+          // From latest.yml, so the offer can state the size before the user commits to it.
+          sizeBytes: (info.files && info.files[0] && info.files[0].size) || 0,
         });
       }
       this.userInitiated = false;

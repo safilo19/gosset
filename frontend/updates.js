@@ -130,7 +130,11 @@ function openUpdateWindow(info) {
         h('p', { class: 'update-title', text: `${brand.name} ${info.version} is available` }),
         h('p', {
           class: 'update-sub',
-          text: `Updating from ${info.currentVersion || brand.version} to ${info.version}.`,
+          // The size is named BEFORE the user commits. This is a ~190 MB download; someone on a
+          // metered or slow connection needs that number to make the decision, not after starting it.
+          text:
+            `Updating from ${info.currentVersion || brand.version} to ${info.version}.` +
+            (info.sizeBytes ? ` Download is about ${Math.round(info.sizeBytes / 1048576)} MB.` : ''),
         }),
       ]),
     ]),
