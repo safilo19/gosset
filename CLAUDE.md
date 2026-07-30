@@ -12,13 +12,25 @@ analysis code serves two interfaces: a REST API + browser UI, and an MCP server.
 Read this first, then the linked memory notes for whatever area you're touching (paths relative to
 `~/.claude/projects/C--Users-xafiz-OneDrive-Documents-personal-analytics-mcp/memory/`).
 
+**Project files are `.gsp`** ("Gosset project"), which is what the Windows installer registers. The
+older `.baproj` is still ACCEPTED on open so nobody's saved work becomes unopenable — the format never
+changed, only the extension. Everything below that says `.baproj` means `.gsp` for anything new.
+A `.gsp`'s `worksheets[].rows` are **row objects keyed by column name**, not arrays; a hand-authored
+fixture with arrays 422s at `POST /datasets/values`, and until 2026-07-30 it did so INVISIBLY (see the
+trap list).
+
 ## Run it
 
 ```
 LaunchBackend.bat                                  # venv + uvicorn on :8000 + opens the browser
 uvicorn backend.api:app --reload --port 8000       # manual equivalent
 python mcp_server.py                               # MCP server (stdio), separate process/state
+cd desktop && npm start                            # the Electron shell (falls back to .venv python)
+cd desktop && npm run build                        # PyInstaller sidecar + NSIS installer
 ```
+
+The desktop shell (`desktop/`) **wraps** this and never replaces it: same frontend, same REST API, a
+bundled Python sidecar on a free loopback port. → `project_desktop_shell_installer.md`
 
 Frontend is plain ES modules + CSS, **no build step**, served by FastAPI itself from `frontend/`
 (`app.mount("/", ...)` at the bottom of `api.py`, mounted last so it never shadows API routes).
@@ -488,32 +500,44 @@ None of these produce an error message. Full detail in the reference memory note
     `worksheetIndex` that `remapWorksheets()` was about to read — so every rule restored from a
     project pointed at no worksheet and quietly never fired. Nothing errored; the tints were just
     absent. Round-trip a project and *count what comes back*, don't just check it parses.
-17. **A PDF content stream is ASCII85 *then* Flate, and reportlab writes floats with no leading zero.**
+17. **`os.kill(pid, 0)` does not probe liveness on Windows — it TERMINATES the process.** CPython maps
+   every signal except `CTRL_C_EVENT`/`CTRL_BREAK_EVENT` onto `TerminateProcess`, so the POSIX idiom
+   for "is my parent still alive?" shot the Electron shell dead about two seconds after launch. The
+   shell logged a clean startup, spawned the sidecar, and vanished — no exception, no lifecycle event,
+   exit code 0. Use `OpenProcess` + `WaitForSingleObject` (`sidecar.py::_watch_parent`).
+   → `project_desktop_shell_installer.md`
+18. **A failed project restore printed nothing at all.** `restoreProject` calls `wm.closeAll()` and
+   clears `state.datasets` before anything can fail, so when it threw, the import panel's error line
+   was written into an element that had already been destroyed. No message, no data, a half-cleared
+   session — identical to the click doing nothing. Errors now go through `ws.showError`, which draws on
+   the worksheet and outlives `closeAll`. **Anything that clears state before it can fail needs an
+   error surface that survives the clearing.**
+19. **A PDF content stream is ASCII85 *then* Flate, and reportlab writes floats with no leading zero.**
     Grepping the raw file for an operator finds nothing; `zlib.decompress` alone also fails, because the
     filter chain is `/ASCII85Decode /FlateDecode`. Use pypdf's `page.get_contents().get_data()`, which
     applies the whole chain. And the success green is emitted as `.141176 .631373 .282353 rg`, not
     `0.141176 …` — a colour regex expecting the leading zero matches nothing. Both of these made a
     verdict badge that was rendering perfectly look like it was missing, for an embarrassingly long time.
     When a probe and a screenshot disagree, **trust the screenshot** and fix the probe.
-18. **No bundled font has U+25CF (`●`).** The badge dot is a drawn circle (`components._Dot`), not a
+20. **No bundled font has U+25CF (`●`).** The badge dot is a drawn circle (`components._Dot`), not a
     glyph. Every one of the five faces has `•` and `·` but not `●`, so it rendered as nothing at all —
     silently, because a missing glyph is not an error. Word's own fonts *do* have it, which is why the
     docx badge uses the real character. Check coverage with fontTools before using an exotic character.
-19. **`:root[data-theme='light']` cannot be read from any element except `<html>`.** Both token sets are
+21. **`:root[data-theme='light']` cannot be read from any element except `<html>`.** Both token sets are
     declared on `:root`, so `getComputedStyle` on a `<div data-theme='light'>` returns the *dark* values
     it inherited — a plausible-looking probe that quietly measures the wrong theme. `charts/theme.js`
     reads the light values out of the stylesheet RULE (`lightRuleLookup()`) instead, which is how a
     print capture gets light colours without flipping the whole app to light for a frame.
-20. **Restoring the theme after `new Chart(...)` returns is too early.** `mountChart` deliberately draws
+22. **Restoring the theme after `new Chart(...)` returns is too early.** `mountChart` deliberately draws
     on a later frame (it waits for the canvas to be connected), and a plugin that fills the plot area
     reads `theme.SURFACE` at DRAW time. A print capture that restored the palette synchronously produced
     charts with light axes on a dark background. `withPrintRendering` is `async` and awaits the whole
     capture for that reason — an easy "simplification" to make and a hard one to see.
-21. **A one-cell reportlab Table cannot split, whatever you set on it.** Splitting happens between
+23. **A one-cell reportlab Table cannot split, whatever you set on it.** Splitting happens between
     ROWS, so a card built as a single cell raises `LayoutError: too large on page` the moment its
     content exceeds one page. `components.result_card` therefore uses one row per content flowable,
     with `splitByRow=1, splitInRow=1` and the 14pt padding applied to the first and last rows only.
-22. **reportlab declares Helvetica and Times-Roman on pages that draw neither.** Three separate causes,
+24. **reportlab declares Helvetica and Times-Roman on pages that draw neither.** Three separate causes,
     each invisible: `CellStyle.fontname` defaults to Helvetica, so **every** Table needs an explicit
     `("FONT", …)` command even when all its cells are Paragraphs; `graphics.shapes.STATE_DEFAULTS`
     seeds Times-Roman into any page that renders a Drawing (the logo), fixed once in `ensure_fonts()`;
