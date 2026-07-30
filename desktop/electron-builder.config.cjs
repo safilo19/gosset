@@ -63,6 +63,28 @@ module.exports = {
   // build time to save very little, because there is little left to squeeze.
   compression: 'normal',
 
+  // The publish provider. Its FIRST job is not publishing — declaring it is what makes electron-builder
+  // emit `latest.yml` and the `.blockmap` alongside the installer, and those two files ARE the update
+  // feed: electron-updater fetches latest.yml to learn what the newest version is, and the blockmap is
+  // what lets it download only the changed chunks of a 186 MB installer instead of all of it. Without
+  // a publish config you get a perfectly good installer that no existing install can ever discover.
+  //
+  // owner/repo are explicit rather than inferred from the git remote, so the update feed does not
+  // silently change if someone builds from a fork.
+  //
+  // No token appears here. In Actions, GITHUB_TOKEN arrives through the environment; locally,
+  // `--publish never` means this config is only ever read for its filenames.
+  publish: [
+    {
+      provider: 'github',
+      owner: 'safilo19',
+      repo: 'personal-analytics-mcp',
+      // Publish immediately rather than as a draft: a draft release is invisible to electron-updater,
+      // so a drafted release would look to every installed copy exactly like no release at all.
+      releaseType: 'release',
+    },
+  ],
+
   win: {
     target: [{ target: 'nsis', arch: ['x64'] }],
     icon: 'build/icon.ico',

@@ -28,6 +28,8 @@ import * as iconGallery from './icons/gallery.js';
 import * as menuHelp from './menuHelp.js';
 import * as brand from './brand/brand.js';
 import * as desktop from './desktopBridge.js';
+import * as updates from './updates.js';
+import * as whatsNew from './whatsNew.js';
 import * as blockMenu from './blockMenu.js';
 import * as blockCapture from './blockCapture.js';
 import * as reportPane from './reportPane.js';
@@ -1863,6 +1865,36 @@ function openOptionsDialog() {
       ]);
       themeSelect.value = current.theme;
 
+      // Updates. Built here rather than inline in the form so the browser build can leave it out
+      // entirely (null renders as nothing) instead of showing a disabled control.
+      const autoUpdate = h('input', { type: 'checkbox' });
+      autoUpdate.checked = current.autoUpdate;
+      const versionLine = h('span', { class: 'settings-hint', text: `Version ${brand.version}` });
+      const checkNowBtn = h('button', { type: 'button', class: 'btn', text: 'Check now' });
+      checkNowBtn.addEventListener('click', async () => {
+        checkNowBtn.disabled = true;
+        checkNowBtn.textContent = 'Checking…';
+        try {
+          await updates.checkNow();
+        } finally {
+          // Re-enabled regardless: the ANSWER arrives asynchronously as its own window, so leaving the
+          // button dead would strand anyone whose check quietly found nothing.
+          checkNowBtn.disabled = false;
+          checkNowBtn.textContent = 'Check now';
+        }
+      });
+      const updateField = desktop.updater()
+        ? h('div', { class: 'field' }, [
+            h('label', { text: 'Updates' }),
+            h('label', { class: 'checkbox-item' }, [autoUpdate, 'Check for updates automatically']),
+            h('div', { class: 'field-inline' }, [checkNowBtn, versionLine]),
+            h('p', {
+              class: 'settings-hint',
+              text: 'Gosset checks GitHub for a new release shortly after starting and every few hours. It never downloads anything without asking, and a failed check is silent.',
+            }),
+          ])
+        : null;
+
       const form = h('form', { class: 'dialog' }, [
         h('div', { class: 'field' }, [
           h('label', { text: 'Theme' }),
@@ -1902,6 +1934,9 @@ function openOptionsDialog() {
             ? h('p', { class: 'settings-hint', text: 'Your system asks for reduced motion, so animation stays off regardless of this setting.' })
             : null,
         ]),
+        // Only in the desktop app: a browser tab has no installer to replace, so showing this there
+        // would be a setting that governs nothing.
+        updateField,
         h('div', { class: 'dialog-actions' }, [
           h('button', { type: 'submit', class: 'btn btn-primary', text: 'Apply' }),
           h('button', { type: 'button', class: 'btn', text: 'Cancel', onClick: close }),
@@ -1916,6 +1951,7 @@ function openOptionsDialog() {
           animations: animations.checked,
           menuHelp: menuHelpToggle.checked,
           interactiveCharts: interactiveCharts.checked,
+          autoUpdate: updateField ? autoUpdate.checked : settings.get().autoUpdate,
           theme: themeSelect.value,
         });
         close();
@@ -1944,6 +1980,25 @@ function openAboutWindow() {
     h('p', { class: 'about-name', text: brand.name }),
     h('p', { class: 'about-version', text: `Version ${brand.version}` }),
     h('p', { class: 'about-namesake', text: brand.namesake }),
+    // Two ways at the notes: the bundled changelog for this build (works offline, and is the version
+    // actually running), and the full history on GitHub.
+    h('p', { class: 'about-links' }, [
+      h('a', {
+        href: '#',
+        text: "What's new",
+        onClick: (e) => {
+          e.preventDefault();
+          whatsNew.show({ wm });
+        },
+      }),
+      h('span', { class: 'about-link-sep', text: '·' }),
+      h('a', {
+        href: `${brand.repoUrl}/blob/main/CHANGELOG.md`,
+        target: '_blank',
+        rel: 'noreferrer',
+        text: 'Release notes',
+      }),
+    ]),
     h('p', { class: 'about-credits', text: `Built on ${brand.credits}` }),
   ]);
   wm.createWindow({ id: 'about', title: `About ${brand.name}`, kind: 'result', width: 380, height: 320, content });
@@ -1957,6 +2012,10 @@ let appliedInteractiveCharts = settings.get().interactiveCharts;
 
 function applySettings(next) {
   document.documentElement.classList.toggle('motion-off', !next.animations);
+  // The main process runs the background check, so it has to know the preference. Pushed on every
+  // apply (and once at startup) rather than read across the bridge, because the setting lives in
+  // localStorage where only the renderer can see it.
+  updates.setEnabled(next.autoUpdate);
   // Chart.js needs no CSS for plain mode — charts/theme.js registers no listeners at all in it —
   // but Plotly's modebar is DOM chrome behind a config value that no relayout can reach, so the
   // stylesheet hides it from `:root.charts-plain`. Set here too on first load, before any chart.
@@ -3049,6 +3108,52 @@ apiClient
     openImportWindow(`Could not create a blank worksheet (${err.message}). You can still open a file here.`);
   })
   .finally(() => {
+    // "What's new" first, so if this launch is the one right after an update the notes are the front
+    // window rather than appearing behind an update prompt three seconds later.
+    whatsNew.maybeShow({
+      wm,
+      lastRunVersion: settings.lastRunVersion(),
+      rememberVersion: (v) => settings.rememberRunVersion(v),
+      log: (text) => logSessionLine(text),
+    });
+
+    updates.init({
+      wm,
+      autoCheckEnabled: () => settings.get().autoUpdate,
+      log: (text) => logSessionLine(text),
+      // An update replaces the running application, so anything unsaved has to be dealt with first.
+      // "Unsaved" here means a worksheet that has been touched — which is the same test File > Close
+      // uses, so the two cannot disagree about whether work exists.
+      hasUnsavedWork: () => state.datasets.some((r) => r.touched) || state.results.length > 0,
+      // Returns false to abandon the restart. Deliberately the app's ORDINARY save flow rather than a
+      // bespoke prompt: the user already knows what Save Project does, and a second dialog that looked
+      // different would raise the question of whether it saves the same thing.
+      saveBeforeQuit: async () => {
+        // Three outcomes, so dialogs.ask rather than confirm (which is boolean): saving is not the
+        // opposite of restarting, and collapsing "don't save" into "don't restart" would either lose
+        // work or strand the update.
+        const choice = await dialogs.ask({
+          title: 'Save before updating?',
+          message: 'Gosset will restart to finish updating.',
+          detail: 'This session has work that has not been saved to a project file.',
+          buttons: [
+            { label: 'Save and restart', value: 'save', primary: true },
+            { label: 'Restart without saving', value: 'discard', danger: true },
+            { label: 'Stay in Gosset', value: 'cancel' },
+          ],
+        });
+        if (choice !== 'save' && choice !== 'discard') return false; // cancelled or dismissed
+        if (choice === 'save') {
+          await saveProject();
+          // saveProject returns early if the name prompt or the native save dialog was cancelled, in
+          // which case nothing was written — restarting now would be the exact data loss this whole
+          // path exists to prevent. An unnamed project is the reliable signal that no file was saved.
+          if (!state.project.name) return false;
+        }
+        return true;
+      },
+    });
+
     // Registered LAST, and in `finally` so a failed blank worksheet does not cost us the handler.
     //
     // The desktop shell holds a .gsp that arrived on the command line until this call tells it the

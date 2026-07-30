@@ -3104,6 +3104,145 @@ textarea:focus {
   color: var(--muted);
 }
 
+.about-links {
+  margin: 0 0 10px;
+  font-size: 12px;
+}
+
+.about-link-sep {
+  margin: 0 6px;
+  color: var(--muted);
+}
+
+/* ---------------- update + what's new (updates.js, whatsNew.js) ----------------
+   Both are ordinary windows, so they inherit the window's surface, border, radius and shadow and only
+   need their own internal rhythm. Every colour is a token: a raw hex here would be wrong in one of the
+   two themes, which is the rule for this whole stylesheet. */
+
+.update-panel,
+.whatsnew {
+  padding: 2px 2px 4px;
+}
+
+.update-head,
+.whatsnew-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.update-mark,
+.whatsnew-mark {
+  flex: 0 0 auto;
+  display: flex;
+  color: var(--accent);
+}
+
+.update-title,
+.whatsnew-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.update-sub,
+.whatsnew-sub {
+  margin: 2px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.update-notes,
+.whatsnew-list {
+  margin: 0 0 12px;
+  padding-left: 18px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.update-notes li,
+.whatsnew-list li {
+  margin-bottom: 4px;
+}
+
+/* Download progress. A 1px trough with an accent fill — the same material as the rest of the app, at
+   the smallest size that still reads as a measure. */
+.update-bar {
+  height: 4px;
+  margin: 0 0 8px;
+  border-radius: 2px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.update-bar-fill {
+  height: 100%;
+  width: 0;
+  background: var(--accent);
+  /* Not suppressed under motion-off: this is a measure of real progress, not decoration, and a bar
+     that jumps in steps is harder to read than one that moves. */
+  transition: width 180ms linear;
+}
+
+.update-status {
+  margin: 0 0 10px;
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.update-manual {
+  margin: 0 0 10px;
+}
+
+/* One block per version, so someone who skipped releases can see which change came from where. */
+.whatsnew-body {
+  max-height: 46vh;
+  overflow-y: auto;
+}
+
+.whatsnew-release + .whatsnew-release {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--gridline);
+}
+
+.whatsnew-release-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.whatsnew-version {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.whatsnew-date {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* Small caps for the Added/Fixed group labels, matching the report engine's group labels. */
+.whatsnew-group {
+  margin: 8px 0 4px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
 /* ---------------- menu help card (menuHelp.js) ----------------
    Explains the menu item the pointer is resting on. Same material as a window — surface, 1px
    border, 4px radius, panel shadow — because it is another floating panel, not a new kind of thing.

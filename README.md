@@ -81,8 +81,19 @@ Every menu item carries an icon and a hover help card saying what it does and wh
 
 ## Download and install
 
-Take the latest **`Gosset-Setup-x.y.z.exe`** from the [**Releases**](../../releases/latest) page and
-run it.
+<div align="center">
+
+### [⬇  Download Gosset for Windows](https://github.com/safilo19/personal-analytics-mcp/releases/latest)
+
+[![Latest release](https://img.shields.io/github/v/release/safilo19/personal-analytics-mcp?label=latest&style=for-the-badge&color=0F62FE)](https://github.com/safilo19/personal-analytics-mcp/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/safilo19/personal-analytics-mcp/total?style=for-the-badge&color=0F62FE)](https://github.com/safilo19/personal-analytics-mcp/releases)
+
+<sub>Windows 10 / 11, 64-bit · ~190 MB · no account, no admin rights</sub>
+
+</div>
+
+Run the installer and you're done. Once installed, Gosset keeps itself up to date — it checks for new
+releases in the background and offers to install them, so this is the only time you need this page.
 
 Gosset installs **per-user** — no administrator rights, no UAC prompt. It adds a desktop shortcut and a
 Start Menu entry, and registers `.gsp` files so double-clicking a project opens it.
@@ -107,6 +118,21 @@ Everything runs locally — an ordinary Windows application with a bundled Pytho
 
 **Requirements:** Windows 10 or 11, 64-bit; about 700 MB on disk (the bundled scientific Python stack
 is most of that).
+
+### Staying up to date
+
+Gosset checks GitHub for a new release a few seconds after starting, and every four hours after that.
+When one exists it shows the release notes and asks — it never downloads anything on its own.
+
+- **Update now** downloads the new version with a progress indicator, then offers to restart. If the
+  session has unsaved work, it asks about that *before* restarting.
+- **Later** stops asking until the next time you start Gosset.
+- A failed check is silent. Offline, behind a proxy, or GitHub unreachable: Gosset says nothing and
+  carries on, because a dialog every launch about a thing you cannot fix is worse than no dialog.
+
+Turn it off in **File > Options > Updates**, which also has a **Check now** button and shows the version
+you are running. After an update, a **What's new** window shows the notes for every version you skipped,
+once.
 
 **Uninstalling:** Apps & features → Gosset → Uninstall, which removes the app, its shortcuts and the
 `.gsp` association. Your saved projects and exported reports are left alone, and so is
@@ -265,16 +291,32 @@ There is **no automated test suite**. Verification is three layers, in order: a 
 cross-check in Python, then the live REST API, then the real dialogs driven in a browser. The browser
 layer has repeatedly caught bugs the other two cannot.
 
-### Versioning
+### Releasing
 
 `desktop/package.json`'s `version` is the single source of truth. `npm run stamp` propagates it to
-`backend/version.py` (report footers) and `frontend/brand/version.js` (the About window); both are
-committed, so a source checkout needs no Node.js to run. `npm run stamp -- --check` fails if they have
-drifted.
+`backend/version.py` (report footers), `frontend/brand/version.js` (the About window) and
+`frontend/changelogData.js` (the in-app "What's new" notes, generated from `CHANGELOG.md`). All three
+are committed, so a source checkout needs no Node.js to run, and `npm run stamp -- --check` fails if
+they have drifted.
 
-Pushing a `v1.2.3` tag builds the installer and publishes a GitHub Release
-(`.github/workflows/release.yml`). The tag has to match `package.json` or the workflow stops before
-building anything.
+One command ships a release:
+
+```bash
+cd desktop
+npm run release -- patch          # or minor / major / an explicit 1.4.2
+```
+
+It bumps the version, inserts a `CHANGELOG.md` section for you to fill in, re-stamps, commits, tags
+`v<version>` and pushes. Pushing the tag is what starts the build. Add `--dry-run` to see every step
+without changing anything.
+
+The workflow then builds the installer, publishes it to a GitHub Release together with `latest.yml` and
+the `.blockmap` — the two files the in-app updater needs — and replaces the release body with that
+version's `CHANGELOG.md` section. One changelog, three surfaces: the file, the Releases page, and the
+app's "What's new" window.
+
+The release is refused before anything is built if the tag disagrees with `package.json`, if the
+changelog section is missing or still holds its placeholder, or if the update feed was not produced.
 
 ### A note on names
 

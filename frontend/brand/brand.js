@@ -18,6 +18,8 @@ const NAME = 'Gosset';
 
 /** Named for William Sealy Gosset, who published the t-distribution as "Student" in 1908. */
 const NAMESAKE = 'Named for W. S. Gosset — “Student”, 1908';
+/** Where About's "Release notes" link and the updater's manual-download fallback point. */
+const REPO_URL = 'https://github.com/safilo19/personal-analytics-mcp';
 const CREDITS = 'FastAPI · pandas · SciPy · statsmodels · scikit-learn · Chart.js · Plotly · matplotlib';
 
 const cache = new Map();
@@ -39,6 +41,7 @@ export const version = VERSION;
 export const name = NAME;
 export const namesake = NAMESAKE;
 export const credits = CREDITS;
+export const repoUrl = REPO_URL;
 
 /** Inline the full lockup (mark + wordmark) into an element. */
 export async function mountLogo(host) {

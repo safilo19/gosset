@@ -18,6 +18,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { repoRoot, desktopRoot } from './paths.mjs';
+import { parseChangelog } from './changelog.mjs';
 
 const checkOnly = process.argv.includes('--check');
 
@@ -55,7 +56,99 @@ VERSION = "${version}"
 export const VERSION = '${version}';
 `,
   },
+  {
+    path: join(repoRoot, 'frontend', 'changelogData.js'),
+    body: changelogModule(),
+  },
 ];
+
+/**
+ * CHANGELOG.md as an ES module the app can import.
+ *
+ * Generated, not fetched: the "What's new" window has to work offline, and it must show the notes for
+ * the version actually running — the copy bundled with that build.
+ *
+ * Every string goes through JSON.stringify rather than being wrapped in quotes. Release notes are
+ * ordinary English and contain apostrophes ("the project's name"), which is a syntax error inside a
+ * single-quoted literal. Hand-writing this file produced exactly that break once.
+ */
+function changelogModule() {
+  // CHANGELOG.md is markdown, and the GitHub Release body renders it. The app does NOT have a markdown
+  // renderer — bullets are set as text nodes — so `.gsp` came out with its backticks visible. The
+  // markup is flattened here rather than in the app: the file stays proper markdown for GitHub, and the
+  // app receives display text without needing a parser or a dangerouslySetInnerHTML-shaped hole.
+  const plain = (s) =>
+    s
+      .replace(/`([^`]+)`/g, '$1') // `code`
+      .replace(/\*\*([^*]+)\*\*/g, '$1') // **bold**
+      .replace(/(^|\s)\*([^*]+)\*(?=\s|$)/g, '$1$2') // *italic*
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // [text](url)
+      .trim();
+
+  const releases = parseChangelog().map((r) => ({
+    version: r.version,
+    date: r.date,
+    bullets: r.bullets.map((b) => ({ group: b.group, text: plain(b.text) })),
+  }));
+
+  const entries = releases
+    .map(
+      (r) => `  {
+    version: ${JSON.stringify(r.version)},
+    date: ${JSON.stringify(r.date)},
+    bullets: [
+${r.bullets.map((b) => `      { group: ${JSON.stringify(b.group)}, text: ${JSON.stringify(b.text)} },`).join('\n')}
+    ],
+  },`,
+    )
+    .join('\n');
+
+  return `// The changelog, as data the app can render.
+//
+// GENERATED FILE — do not edit by hand. \`npm run stamp\` (desktop/scripts/stamp-version.mjs) rebuilds it
+// from CHANGELOG.md, which is the single source, and the release script and the CI build both run that
+// first.
+//
+// It is generated rather than fetched for two reasons that both matter: the "What's new" window has to
+// work with no network (Gosset is an offline app), and it must show the notes for the version the user
+// is ACTUALLY running, which is the copy bundled with that build — not whatever main happens to say.
+
+/** @type {{version: string, date: string, bullets: {group: string, text: string}[]}[]} newest first */
+export const RELEASES = [
+${entries}
+];
+
+/** Semver compare for this project's plain \`x.y.z[-pre]\` versions: <0, 0 or >0. */
+export function compareVersions(a, b) {
+  const split = (v) => {
+    const [core, pre = ''] = String(v).replace(/^v/, '').split('-');
+    return { nums: core.split('.').map((n) => parseInt(n, 10) || 0), pre };
+  };
+  const A = split(a);
+  const B = split(b);
+  for (let i = 0; i < 3; i += 1) {
+    const d = (A.nums[i] || 0) - (B.nums[i] || 0);
+    if (d !== 0) return d < 0 ? -1 : 1;
+  }
+  if (A.pre === B.pre) return 0;
+  if (!A.pre) return 1;
+  if (!B.pre) return -1;
+  return A.pre < B.pre ? -1 : 1;
+}
+
+/**
+ * Every release newer than \`from\` and no newer than \`to\`, newest first.
+ *
+ * This is what makes a user who skipped two versions see all three sets of notes rather than only the
+ * newest. \`from\` null yields just \`to\`: showing someone's first launch the entire project history as a
+ * "what's new" dialog would be noise rather than a welcome.
+ */
+export function releasesBetween(from, to) {
+  if (!from) return RELEASES.filter((r) => r.version === String(to).replace(/^v/, ''));
+  return RELEASES.filter((r) => compareVersions(r.version, from) > 0 && compareVersions(r.version, to) <= 0);
+}
+`;
+}
 
 /**
  * Compare ignoring line endings.

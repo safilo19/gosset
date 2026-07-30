@@ -15,7 +15,16 @@ export const DEFAULTS = {
   // not project data: it lives here rather than in a .baproj so it follows the person, not the
   // file. Read through charts/theme.js::interactive() — never by a renderer directly.
   interactiveCharts: true,
+  // Auto-update: check GitHub Releases in the background. ON by default, because an analytics app that
+  // silently rots is worse than one that occasionally asks. Only ever acted on in the desktop shell —
+  // a browser has no installer to replace — and a failed check is silent (see desktop/src/updater.js).
+  autoUpdate: true,
 };
+
+// The version that last ran, so "What's new" can be shown exactly once after an update. Kept OUT of
+// DEFAULTS/clampSettings: it is a record of what happened, not a preference, and it must not be reset
+// to a default by a settings migration — doing so would re-show the notes.
+const LAST_RUN_VERSION_KEY = 'pa.lastRunVersion.v1';
 
 export const THEME_MODES = ['light', 'dark', 'system'];
 
@@ -50,6 +59,7 @@ function clampSettings(raw) {
     animations: s.animations !== false,
     menuHelp: s.menuHelp !== false,
     interactiveCharts: s.interactiveCharts !== false,
+    autoUpdate: s.autoUpdate !== false,
     // The inline boot script in index.html reads this same key and applies the same fallback, so
     // a corrupt or missing value lands on 'system' before first paint and here identically.
     theme: THEME_MODES.includes(s.theme) ? s.theme : DEFAULTS.theme,
@@ -100,4 +110,27 @@ export function addRecent(entry) {
 
 export function clearRecent() {
   writeJSON(RECENT_KEY, []);
+}
+
+// ---------------------------------------------------------------------------
+// the version that last ran (for "What's new")
+// ---------------------------------------------------------------------------
+
+/** The version recorded on the previous launch, or null on a first run / unreadable storage. */
+export function lastRunVersion() {
+  try {
+    return localStorage.getItem(LAST_RUN_VERSION_KEY) || null;
+  } catch {
+    // Storage unavailable. Returning null means "first run", which suppresses the dialog — the right
+    // way to fail: never showing the notes is a shrug, showing them on every launch is a nag.
+    return null;
+  }
+}
+
+export function rememberRunVersion(version) {
+  try {
+    localStorage.setItem(LAST_RUN_VERSION_KEY, String(version));
+  } catch {
+    /* nothing to do; see above */
+  }
 }

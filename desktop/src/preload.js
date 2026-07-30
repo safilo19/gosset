@@ -57,4 +57,40 @@ contextBridge.exposeInMainWorld('gosset', {
     ipcRenderer.on('gosset:open-project', (_event, payload) => handler(payload));
     ipcRenderer.send('gosset:renderer-ready');
   },
+
+  /**
+   * Auto-update.
+   *
+   * The renderer owns the entire user-facing side: the dialogs are ordinary app windows in the app's
+   * own design language, and the decision to restart is taken there because only the renderer knows
+   * whether there is unsaved work. The main process owns the network and the installer.
+   *
+   * Everything here is a no-op in a browser (see desktopBridge.js), which is what keeps the update UI
+   * out of the dev-mode app entirely rather than showing it a feature it cannot have.
+   */
+  updater: {
+    /** `{currentVersion, supported, releasesUrl}` */
+    info: () => ipcRenderer.invoke('gosset:updater-info'),
+
+    /** Mirror the "Check for updates automatically" preference into the main process. */
+    setEnabled: (enabled) => ipcRenderer.send('gosset:updater-set-enabled', enabled),
+
+    /** `user: true` for the Options "Check now" button — the only check allowed to report failure. */
+    check: (user = false) => ipcRenderer.invoke('gosset:updater-check', { user }),
+
+    /** Start the download the user consented to. Progress arrives via onProgress. */
+    download: () => ipcRenderer.invoke('gosset:updater-download'),
+
+    /** Do not prompt again automatically until the next launch. */
+    snooze: () => ipcRenderer.send('gosset:updater-snooze'),
+
+    /** Quit and install. Call ONLY after the unsaved-work prompt has resolved. */
+    install: () => ipcRenderer.invoke('gosset:updater-install'),
+
+    onAvailable: (fn) => ipcRenderer.on('gosset:update-available', (_e, p) => fn(p)),
+    onNotAvailable: (fn) => ipcRenderer.on('gosset:update-not-available', (_e, p) => fn(p)),
+    onProgress: (fn) => ipcRenderer.on('gosset:update-progress', (_e, p) => fn(p)),
+    onDownloaded: (fn) => ipcRenderer.on('gosset:update-downloaded', (_e, p) => fn(p)),
+    onError: (fn) => ipcRenderer.on('gosset:update-error', (_e, p) => fn(p)),
+  },
 });

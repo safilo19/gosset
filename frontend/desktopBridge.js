@@ -63,3 +63,15 @@ export function onOpenProject(handler) {
   const g = bridge();
   if (g) g.onOpenProject(handler);
 }
+
+/**
+ * The auto-update channel, or null.
+ *
+ * Null in a browser, and that is the feature detect the whole update UI hangs off: File > Options hides
+ * its update section, and `updates.js` wires up no listeners at all. A browser tab has no installer to
+ * replace, so offering to update it would be a button that cannot work.
+ */
+export function updater() {
+  const g = bridge();
+  return g && g.updater ? g.updater : null;
+}

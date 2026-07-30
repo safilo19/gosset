@@ -28,16 +28,32 @@ const { basename, dirname, join, resolve } = require('node:path');
 
 const { log } = require('./log');
 const { Sidecar } = require('./sidecar');
+const { Updater } = require('./updater');
 const { WindowState, MIN_WIDTH, MIN_HEIGHT } = require('./windowState');
 
 const PROJECT_EXT = 'gsp';
 const REPO_ROOT = resolve(__dirname, '..', '..');
 const IS_DEV = process.argv.includes('--dev') || !app.isPackaged;
+/** Where "Release notes" and the manual-download fallback point. */
+const REPO_URL = 'https://github.com/safilo19/personal-analytics-mcp';
 
 /** @type {BrowserWindow | null} */
 let mainWindow = null;
 /** @type {Sidecar | null} */
 let sidecar = null;
+/** @type {Updater | null} */
+let updater = null;
+
+/**
+ * The renderer's "Check for updates automatically" preference, mirrored here.
+ *
+ * It LIVES in the renderer (localStorage, alongside the other File > Options settings, so it follows
+ * the person and travels with nothing else). The main process needs it to decide whether to run the
+ * background check, so the renderer pushes it over on startup and on every change. Defaulting to true
+ * matters: the very first check happens 3s after the window appears, which can be before the renderer
+ * has told us anything.
+ */
+let autoUpdateEnabled = true;
 
 /** A .gsp waiting for the renderer to be able to receive it. */
 let pendingOpenPath = null;
@@ -260,6 +276,46 @@ function registerIpc() {
     const error = await shell.openPath(path);
     return error ? { ok: false, error } : { ok: true };
   });
+
+  // ---------------------------------------------------------------------------
+  // updater
+  // ---------------------------------------------------------------------------
+
+  ipcMain.on('gosset:updater-set-enabled', (_event, enabled) => {
+    autoUpdateEnabled = enabled !== false;
+    log.info(`updater: automatic checks ${autoUpdateEnabled ? 'on' : 'off'}`);
+  });
+
+  ipcMain.handle('gosset:updater-check', async (_event, { user = false } = {}) => {
+    if (!updater) return { started: false, reason: 'unsupported' };
+    await updater.check({ user });
+    return { started: true };
+  });
+
+  ipcMain.handle('gosset:updater-download', async () => {
+    if (!updater) return { started: false };
+    await updater.download();
+    return { started: true };
+  });
+
+  ipcMain.on('gosset:updater-snooze', () => {
+    if (updater) updater.snooze();
+  });
+
+  // The renderer calls this only AFTER its own unsaved-work prompt has resolved — that ordering is the
+  // whole guarantee that an update cannot eat someone's project. The main process deliberately does not
+  // second-guess it: it has no idea what is unsaved, and a native dialog here would be a second,
+  // uglier prompt asking the same question.
+  ipcMain.handle('gosset:updater-install', () => {
+    if (!updater) return { ok: false };
+    return { ok: updater.install() };
+  });
+
+  ipcMain.handle('gosset:updater-info', () => ({
+    currentVersion: app.getVersion(),
+    supported: Boolean(updater && updater.supported),
+    releasesUrl: `${REPO_URL}/releases`,
+  }));
 }
 
 // ---------------------------------------------------------------------------
@@ -297,6 +353,14 @@ async function main() {
 
   const state = new WindowState(userDataDir);
   mainWindow = createWindow(state, sidecar.baseUrl);
+
+  // Started after the window exists, because every message it sends goes to a renderer. Its own first
+  // check is 3s later and non-blocking, so nothing here delays the app being usable.
+  updater = new Updater({
+    getWindow: () => mainWindow,
+    isEnabled: () => autoUpdateEnabled,
+  });
+  updater.start();
 
   if (IS_DEV) log.info(`dev mode — the same app is also at ${sidecar.baseUrl} in a browser`);
 }
