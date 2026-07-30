@@ -13,6 +13,16 @@ workflow copies that same section into the GitHub Release body and the app's "Wh
 these bullets are read by users three times over — write them accordingly. Three to eight per release.
 
 <!-- next-release -->
+## [1.0.2] - 2026-07-30
+
+### Added
+
+- The Help menu now has "What's New" and "Check for Updates", so you no longer have to open About to find either.
+
+### Changed
+
+- Checking for updates from the Help menu tells you when you are already up to date, instead of doing nothing visible.
+
 ## [1.0.1] - 2026-07-30
 
 ### Added
@@ -44,5 +54,6 @@ Gosset's first desktop release.
   the published requirements.
 - Reports are now written to a per-user folder instead of the application directory.
 
+[1.0.2]: https://github.com/safilo19/personal-analytics-mcp/releases/tag/v1.0.2
 [1.0.1]: https://github.com/safilo19/personal-analytics-mcp/releases/tag/v1.0.1
 [1.0.0]: https://github.com/safilo19/personal-analytics-mcp/releases/tag/v1.0.0
