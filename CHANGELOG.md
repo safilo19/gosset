@@ -13,6 +13,15 @@ workflow copies that same section into the GitHub Release body and the app's "Wh
 these bullets are read by users three times over — write them accordingly. Three to eight per release.
 
 <!-- next-release -->
+## [1.0.1] - 2026-07-30
+
+### Added
+
+- Gosset now updates itself. It checks for new releases in the background and offers to install them, showing what changed before you decide. It never downloads anything without asking.
+- A "What's new" window after each update, listing everything that changed since the version you were running — including any releases you skipped.
+- File > Options has an Updates section: turn automatic checks off, check for one now, and see which version you are running.
+- About now links to the release notes.
+
 
 ## [1.0.0] - 2026-07-30
 
@@ -35,4 +44,5 @@ Gosset's first desktop release.
   the published requirements.
 - Reports are now written to a per-user folder instead of the application directory.
 
+[1.0.1]: https://github.com/safilo19/personal-analytics-mcp/releases/tag/v1.0.1
 [1.0.0]: https://github.com/safilo19/personal-analytics-mcp/releases/tag/v1.0.0

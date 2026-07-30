@@ -120,9 +120,22 @@ if (!changelog.includes(NEXT_RELEASE_MARKER)) {
   fail(`CHANGELOG.md is missing its "${NEXT_RELEASE_MARKER}" marker, which is where new sections go.`);
 }
 
+// A section for this version may already exist — someone wrote the notes as they worked, which is the
+// better habit anyway. Accept it if it has real bullets, and skip the insert-and-prompt dance entirely.
+// Only a section that is empty or still holds the placeholder is a problem, and that is caught below.
 const existing = parseChangelog(changelog);
-if (existing.some((r) => r.version === to)) {
-  fail(`CHANGELOG.md already has a [${to}] section. Remove it or pick another version.`);
+const preWritten = existing.find((r) => r.version === to);
+const notesAlreadyWritten = Boolean(
+  preWritten && preWritten.bullets.length && !preWritten.bullets.some((b) => b.text.includes(PLACEHOLDER)),
+);
+if (preWritten && !notesAlreadyWritten) {
+  fail(
+    `CHANGELOG.md already has a [${to}] section, but it is empty or still holds the placeholder.\n` +
+      `Write its notes, or remove the section and run this again.`,
+  );
+}
+if (notesAlreadyWritten) {
+  console.log(`Using the [${to}] section already in CHANGELOG.md (${preWritten.bullets.length} note(s)).`);
 }
 
 const section = [
@@ -140,7 +153,7 @@ const linkRef = `[${to}]: ${repoUrl}/releases/tag/${tag}`;
 
 console.log(`\nGosset release: ${from} -> ${to}  (tag ${tag})\n`);
 
-if (!dryRun) {
+if (!dryRun && !notesAlreadyWritten) {
   // Insert directly under the marker so the newest release is always at the top.
   changelog = changelog.replace(NEXT_RELEASE_MARKER, `${NEXT_RELEASE_MARKER}${section}`);
   // Link references live at the bottom; add this version's above the previous newest.
@@ -158,10 +171,12 @@ if (!dryRun) {
 // ---------------------------------------------------------------------------
 
 if (!dryRun) {
-  console.log(`\nEdit CHANGELOG.md now — replace the placeholder bullet with 3-8 real, user-facing lines.`);
-  console.log(`These reach the GitHub Release body and the app's "What's new" window.\n`);
+  if (!notesAlreadyWritten) {
+    console.log(`\nEdit CHANGELOG.md now — replace the placeholder bullet with 3-8 real, user-facing lines.`);
+    console.log(`These reach the GitHub Release body and the app's "What's new" window.\n`);
+  }
 
-  if (!assumeYes) {
+  if (!assumeYes && !notesAlreadyWritten) {
     const rl = createInterface({ input: process.stdin, output: process.stdout });
     const answer = await rl.question(`Press Enter when the notes are written (or type "abort"): `);
     rl.close();
