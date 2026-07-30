@@ -1622,7 +1622,7 @@ async function openProjectText(text, fileName) {
   if (!payload || payload.app !== PROJECT_MARKER || !(payload.worksheets || payload.worksheet)) {
     throw new Error(`${fileName} is not a ${PROJECT_EXT} project file saved by this app.`);
   }
-  await restoreProject(payload, fileName);
+  await restoreProjectReporting(payload, fileName);
 }
 
 function readFileText(file) {
@@ -1687,7 +1687,28 @@ async function openProjectFile(file) {
   if (!payload || payload.app !== PROJECT_MARKER || !(payload.worksheets || payload.worksheet)) {
     throw new Error(`${file.name} is not a ${PROJECT_EXT} project file saved by this app.`);
   }
-  await restoreProject(payload, file.name);
+  await restoreProjectReporting(payload, file.name);
+}
+
+/**
+ * restoreProject, with its failure made visible.
+ *
+ * restoreProject does two irreversible things before it can fail: `wm.closeAll()` and clearing
+ * state.datasets. So by the time anything throws — a hand-edited file, a worksheet the server
+ * rejects — the window that was going to display the error has already been destroyed, and the
+ * import panel's error line gets written into a detached node. The user sees NOTHING: no message, no
+ * data, and a half-cleared session that looks like the click simply did nothing.
+ *
+ * ws.showError draws on the worksheet, which outlives closeAll, so it is the only surface that can
+ * still be trusted at this point. The error is re-thrown so callers keep their own handling.
+ */
+async function restoreProjectReporting(payload, fileName) {
+  try {
+    await restoreProject(payload, fileName);
+  } catch (err) {
+    ws.showError(`Could not open ${fileName}: ${err.message}`);
+    throw err;
+  }
 }
 
 async function restoreProject(payload, fileName) {

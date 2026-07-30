@@ -66,10 +66,27 @@ module.exports = {
   win: {
     target: [{ target: 'nsis', arch: ['x64'] }],
     icon: 'build/icon.ico',
-    // No signing. See the README's download section: the installer is unsigned because a
+    // The executable's icon and version metadata still get written (that is the "edit" half).
+    signAndEditExecutable: true,
+
+    // No signing — see the README's download section: the installer is unsigned because a
     // code-signing certificate costs money, so SmartScreen shows "unrecognized app" on first run.
     // That is stated plainly to users rather than worked around.
-    signAndEditExecutable: true,
+    //
+    // BUILD PREREQUISITE, because there is no config setting that avoids it: electron-builder fetches
+    // its winCodeSign toolchain even with no certificate present. It logs
+    // `no signing info identified, signing is skipped` and downloads it anyway, and that archive
+    // carries macOS symlinks whose extraction needs a privilege Windows does not grant by default:
+    //
+    //     ERROR: Cannot create symbolic link ... darwin/10.12/lib/libcrypto.dylib
+    //     A required privilege is not held by the client
+    //
+    // after which the build fails on its fourth retry. Neither CSC_IDENTITY_AUTO_DISCOVERY=false nor
+    // a custom no-op `sign` hook prevents the download — both were tried and measured.
+    //
+    // The fix is to seed that cache yourself, WITHOUT the darwin tree (which a Windows build never
+    // touches). The release workflow has a step that does it; for a local build, run the same thing
+    // once — see "The installer" in the README.
     fileAssociations: [
       {
         ext: 'gsp',

@@ -96,6 +96,32 @@ jobs:
           done
           python desktop/scripts/smoke_sidecar.py http://127.0.0.1:8199
 
+      # REQUIRED, not defensive. electron-builder fetches its winCodeSign toolchain even for an
+      # unsigned build, and that archive carries macOS symlinks whose extraction needs a privilege a
+      # Windows runner does not have — so the build dies after four retries on
+      # "Cannot create symbolic link ... libcrypto.dylib". Seeding the cache ourselves without the
+      # darwin tree (which a Windows build never touches) is the only thing that avoids it:
+      # CSC_IDENTITY_AUTO_DISCOVERY=false and a no-op `sign` hook were both tried and neither stops
+      # the download.
+      - name: Pre-seed the electron-builder signing cache
+        shell: pwsh
+        run: |
+          $cache = Join-Path $env:LOCALAPPDATA 'electron-builder\Cache\winCodeSign'
+          New-Item -ItemType Directory -Force $cache | Out-Null
+          $archive = Join-Path $cache 'winCodeSign-2.6.0.7z'
+          $target  = Join-Path $cache 'winCodeSign-2.6.0'
+          if (-not (Test-Path $target)) {
+            Invoke-WebRequest -UseBasicParsing `
+              -Uri 'https://github.com/electron-userland/electron-builder-binaries/releases/download/winCodeSign-2.6.0/winCodeSign-2.6.0.7z' `
+              -OutFile $archive
+            & 7z x $archive "-o$target" '-xr!darwin' -bso0 -bsp0
+          }
+          if (Test-Path (Join-Path $target 'windows-10\x64\signtool.exe')) {
+            Write-Host 'winCodeSign cache seeded'
+          } else {
+            Write-Host '::warning::winCodeSign cache seeding did not produce signtool.exe; relying on the no-op sign hook'
+          }
+
       - name: Build the installer (electron-builder)
         working-directory: desktop
         # Unsigned on purpose — see the README. Left explicit so a future signing setup is one

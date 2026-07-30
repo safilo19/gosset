@@ -233,6 +233,22 @@ npm run build                   # sidecar, then the NSIS installer
 It lands in `%LOCALAPPDATA%\gosset-build\electron`. Build artifacts go **outside** the repository on
 purpose — see the comment in `desktop/scripts/paths.mjs`.
 
+**One-time prerequisite on Windows.** electron-builder downloads a code-signing toolchain even though
+this build is unsigned, and that archive contains macOS symlinks it cannot extract without symlink
+privileges — the build then fails with `Cannot create symbolic link ... libcrypto.dylib`. Seed the
+cache once, without the part a Windows build never uses:
+
+```powershell
+$cache = "$env:LOCALAPPDATA\electron-builder\Cache\winCodeSign"
+New-Item -ItemType Directory -Force $cache | Out-Null
+Invoke-WebRequest -UseBasicParsing -OutFile "$cache\winCodeSign-2.6.0.7z" `
+  'https://github.com/electron-userland/electron-builder-binaries/releases/download/winCodeSign-2.6.0/winCodeSign-2.6.0.7z'
+& 7z x "$cache\winCodeSign-2.6.0.7z" "-o$cache\winCodeSign-2.6.0" '-xr!darwin'
+```
+
+(The release workflow does this itself. Enabling Windows Developer Mode also works, since that grants
+the privilege.)
+
 ### Verifying a build
 
 ```bash
