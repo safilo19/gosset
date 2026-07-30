@@ -6,4 +6,4 @@
 //
 // brand.js re-exports this as `brand.version`, which is what the About window shows.
 
-export const VERSION = '1.0.7';
+export const VERSION = '1.0.8';

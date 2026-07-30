@@ -11,6 +11,13 @@
 /** @type {{version: string, date: string, bullets: {group: string, text: string}[]}[]} newest first */
 export const RELEASES = [
   {
+    version: "1.0.8",
+    date: "2026-07-30",
+    bullets: [
+      { group: "Fixed", text: "A failed update check no longer writes the whole server response, including GitHub session cookies, into Gosset's log file." },
+    ],
+  },
+  {
     version: "1.0.7",
     date: "2026-07-30",
     bullets: [
