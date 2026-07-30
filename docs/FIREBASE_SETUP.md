@@ -138,9 +138,38 @@ Gosset also reads the file from its per-user data directory, which wins over the
 %APPDATA%\Gosset\firebase.config.json
 ```
 
-Useful for trying values out against an installed build. For CI, the same values can come from
-`GOSSET_FIREBASE_API_KEY`, `GOSSET_FIREBASE_CLIENT_ID`, `GOSSET_FIREBASE_CLIENT_SECRET` and
-`GOSSET_FIREBASE_PROJECT_ID`.
+Useful for trying values out against an installed build.
+
+### Shipping sign-in in a release — required, or the feature is dead
+
+`firebase.config.json` is gitignored, so **CI has no credentials by default** and a released installer
+would show "sign-in is not set up" to everyone who downloads it. The release workflow writes the file
+from repository secrets instead.
+
+Add these under **Settings → Secrets and variables → Actions → New repository secret**:
+
+| Secret | Value |
+|---|---|
+| `GOSSET_FIREBASE_API_KEY` | your `apiKey` |
+| `GOSSET_FIREBASE_CLIENT_ID` | your `clientId` |
+| `GOSSET_FIREBASE_CLIENT_SECRET` | your `clientSecret` |
+| `GOSSET_FIREBASE_PROJECT_ID` | your `projectId` |
+
+The workflow skips the step entirely if `API_KEY` or `CLIENT_ID` is missing, so a fork still builds — it
+just builds without sign-in, which is a supported state. The step never echoes a value: a workflow log is
+a public artifact.
+
+**What this means for a public release:** your `clientSecret` is inside the shipped installer. That is
+unavoidable for any installed app doing OAuth, and it is why Google says an installed-app secret cannot be
+treated as confidential and why PKCE exists. The practical consequences are worth knowing rather than
+discovering:
+
+- Someone can extract it and build an app that shows *your* app's name on a Google consent screen. They
+  cannot read your users' data with it, and they cannot touch your Firebase project's contents.
+- If that ever happens, rotate it: **+ Add secret** on the OAuth client, update the repo secret, release.
+  The old secret keeps working until you delete it, so nobody is locked out mid-rotation.
+- Restricting the API key (Firebase console → Project settings, or Cloud console → Credentials) to only
+  the Identity Toolkit and Secure Token APIs limits what a lifted key can be used for. Worth doing.
 
 ---
 

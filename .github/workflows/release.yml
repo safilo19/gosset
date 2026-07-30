@@ -73,6 +73,38 @@ jobs:
         working-directory: desktop
         run: npm run stamp -- --check
 
+      # Sign-in credentials for the shipped build.
+      #
+      # desktop/firebase.config.json is gitignored — it names one Firebase project, and it holds an
+      # OAuth client secret that must not be committed. So CI writes it from repository secrets instead.
+      #
+      # If the secrets are absent the step is SKIPPED rather than failed: a fork, or this repo before the
+      # secrets were added, must still produce a working installer. The only consequence is that its
+      # Account panel says sign-in is not set up, which is a supported state.
+      - name: Write the Firebase config (if configured)
+        shell: pwsh
+        env:
+          API_KEY: ${{ secrets.GOSSET_FIREBASE_API_KEY }}
+          CLIENT_ID: ${{ secrets.GOSSET_FIREBASE_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.GOSSET_FIREBASE_CLIENT_SECRET }}
+          PROJECT_ID: ${{ secrets.GOSSET_FIREBASE_PROJECT_ID }}
+        run: |
+          if (-not $env:API_KEY -or -not $env:CLIENT_ID) {
+            Write-Host '::notice::No Firebase secrets set — building without sign-in configured.'
+            exit 0
+          }
+          $cfg = [ordered]@{
+            apiKey       = $env:API_KEY
+            authDomain   = "$($env:PROJECT_ID).firebaseapp.com"
+            projectId    = $env:PROJECT_ID
+            clientId     = $env:CLIENT_ID
+            clientSecret = $env:CLIENT_SECRET
+          }
+          $path = Join-Path 'desktop' 'firebase.config.json'
+          $cfg | ConvertTo-Json | Set-Content $path -Encoding utf8
+          # Confirm it landed WITHOUT echoing any value — a log is a public artifact.
+          Write-Host "wrote $path ($((Get-Item $path).Length) bytes); sign-in will be configured in this build"
+
       - name: Generate icons from the brand mark
         working-directory: desktop
         run: npm run icons
