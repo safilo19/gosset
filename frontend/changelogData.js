@@ -11,6 +11,14 @@
 /** @type {{version: string, date: string, bullets: {group: string, text: string}[]}[]} newest first */
 export const RELEASES = [
   {
+    version: "1.1.0",
+    date: "2026-07-30",
+    bullets: [
+      { group: "Added", text: "Optional Google sign-in. Signing in shows your name and picture in the menu bar and puts your name on the cover of reports you export. That is all it does: nothing is uploaded, no feature requires it, and Gosset works exactly the same signed out." },
+      { group: "Added", text: "Help > Account shows who is signed in and lets you sign in or out." },
+    ],
+  },
+  {
     version: "1.0.8",
     date: "2026-07-30",
     bullets: [
