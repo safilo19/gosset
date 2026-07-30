@@ -3125,9 +3125,24 @@ apiClient
       autoCheckEnabled: () => settings.get().autoUpdate,
       log: (text) => logSessionLine(text),
       // An update replaces the running application, so anything unsaved has to be dealt with first.
-      // "Unsaved" here means a worksheet that has been touched — which is the same test File > Close
-      // uses, so the two cannot disagree about whether work exists.
-      hasUnsavedWork: () => state.datasets.some((r) => r.touched) || state.results.length > 0,
+      //
+      // Deliberately BROAD, and it is not enough to ask whether a worksheet is `touched`: that flag is
+      // set from onGridChanged, which fires on structural changes, so a cell edit committed on blur
+      // never sets it. Someone could type a whole table in by hand and this returned false — the
+      // update then restarted over the top of it without asking, which is exactly what this guard
+      // exists to prevent. Observed, not theorised.
+      //
+      // So every kind of session content counts, and the test errs toward asking. The cost of asking
+      // unnecessarily is one extra click; the cost of not asking is somebody's work.
+      hasUnsavedWork: () =>
+        Boolean(
+          state.results.length ||
+            state.datasets.some((r) => r.touched) ||
+            ws.hasData() ||
+            constants.list().length ||
+            matrices.list().length ||
+            reportPane.serialize().length,
+        ),
       // Returns false to abandon the restart. Deliberately the app's ORDINARY save flow rather than a
       // bespoke prompt: the user already knows what Save Project does, and a second dialog that looked
       // different would raise the question of whether it saves the same thing.

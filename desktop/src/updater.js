@@ -313,15 +313,22 @@ class Updater {
   /**
    * Quit and install. Only ever called once the renderer has confirmed there is no unsaved work.
    *
-   * isSilent=false so the installer's progress is visible, isForceRunAfter=true so the app comes back
-   * up — an update that quietly exits and leaves the user staring at a desktop reads as a crash.
+   * isSilent MUST be true, and that is not a preference. The NSIS target is configured
+   * `oneClick: false`, which makes the installer a WIZARD — so a non-silent install launches the full
+   * "choose a location, click Next" flow. Observed with isSilent=false: the app quit, the setup wizard
+   * appeared waiting for input, and nothing was installed. Anyone who dismissed that window would be
+   * left with no running app and the old version still on disk. A user who pressed "Restart to finish
+   * updating" has already consented; they should not then have to complete an installer by hand.
+   *
+   * isForceRunAfter=true so the app comes back up — an update that quietly exits and leaves the user
+   * staring at a desktop reads as a crash.
    */
   install() {
     const updater = this.init();
     if (!updater || !this.downloaded) return false;
-    log.info('updater: quitAndInstall');
+    log.info('updater: quitAndInstall (silent)');
     // setImmediate so the IPC reply reaches the renderer before the process starts tearing down.
-    setImmediate(() => updater.quitAndInstall(false, true));
+    setImmediate(() => updater.quitAndInstall(true, true));
     return true;
   }
 }

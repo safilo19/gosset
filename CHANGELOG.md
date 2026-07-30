@@ -13,6 +13,15 @@ workflow copies that same section into the GitHub Release body and the app's "Wh
 these bullets are read by users three times over — write them accordingly. Three to eight per release.
 
 <!-- next-release -->
+## [1.0.6] - 2026-07-30
+
+### Fixed
+
+- Installing an update no longer opens the setup wizard. Choosing "Restart to finish updating" quit Gosset and then waited for someone to click through an installer; if you closed that window, you were left with no app running and the old version still installed.
+- Gosset now asks about unsaved work before restarting to update in every case. Data typed straight into the worksheet did not count as work, so an update could restart over the top of it without asking.
+- The update window shows only the release notes. It was also listing the download and Windows-warning instructions from the release page, including advice to download the installer by hand.
+- Update installation no longer runs a signature check that cannot pass for these unsigned builds.
+
 ## [1.0.5] - 2026-07-30
 
 ### Changed
@@ -74,6 +83,7 @@ Gosset's first desktop release.
   the published requirements.
 - Reports are now written to a per-user folder instead of the application directory.
 
+[1.0.6]: https://github.com/safilo19/personal-analytics-mcp/releases/tag/v1.0.6
 [1.0.5]: https://github.com/safilo19/personal-analytics-mcp/releases/tag/v1.0.5
 [1.0.4]: https://github.com/safilo19/personal-analytics-mcp/releases/tag/v1.0.4
 [1.0.3]: https://github.com/safilo19/personal-analytics-mcp/releases/tag/v1.0.3
