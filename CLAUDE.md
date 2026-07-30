@@ -512,32 +512,42 @@ None of these produce an error message. Full detail in the reference memory note
    session — identical to the click doing nothing. Errors now go through `ws.showError`, which draws on
    the worksheet and outlives `closeAll`. **Anything that clears state before it can fail needs an
    error surface that survives the clearing.**
-19. **A PDF content stream is ASCII85 *then* Flate, and reportlab writes floats with no leading zero.**
+19. **The desktop app's PORT is part of its identity, because localStorage is partitioned by ORIGIN.**
+   The window loads `http://127.0.0.1:<port>`, and every File > Options preference, the theme, the
+   recent-files list and the "last version run" marker live in localStorage. While the port was
+   OS-assigned per launch, each launch got a fresh storage bucket: the desktop app silently reset every
+   preference on every restart, and the "What's new" window could never appear because the version
+   marker it compares against was always absent. Three origins were sitting in one install's Local
+   Storage, one per launch. `sidecar.js` now fixes the port (48219, deterministic walk, OS-assigned
+   only as a logged last resort). **Anything that changes the origin throws away all client-side
+   state** — the same trap waits for a custom protocol or a hostname change.
+   → `project_desktop_shell_installer.md`
+20. **A PDF content stream is ASCII85 *then* Flate, and reportlab writes floats with no leading zero.**
     Grepping the raw file for an operator finds nothing; `zlib.decompress` alone also fails, because the
     filter chain is `/ASCII85Decode /FlateDecode`. Use pypdf's `page.get_contents().get_data()`, which
     applies the whole chain. And the success green is emitted as `.141176 .631373 .282353 rg`, not
     `0.141176 …` — a colour regex expecting the leading zero matches nothing. Both of these made a
     verdict badge that was rendering perfectly look like it was missing, for an embarrassingly long time.
     When a probe and a screenshot disagree, **trust the screenshot** and fix the probe.
-20. **No bundled font has U+25CF (`●`).** The badge dot is a drawn circle (`components._Dot`), not a
+21. **No bundled font has U+25CF (`●`).** The badge dot is a drawn circle (`components._Dot`), not a
     glyph. Every one of the five faces has `•` and `·` but not `●`, so it rendered as nothing at all —
     silently, because a missing glyph is not an error. Word's own fonts *do* have it, which is why the
     docx badge uses the real character. Check coverage with fontTools before using an exotic character.
-21. **`:root[data-theme='light']` cannot be read from any element except `<html>`.** Both token sets are
+22. **`:root[data-theme='light']` cannot be read from any element except `<html>`.** Both token sets are
     declared on `:root`, so `getComputedStyle` on a `<div data-theme='light'>` returns the *dark* values
     it inherited — a plausible-looking probe that quietly measures the wrong theme. `charts/theme.js`
     reads the light values out of the stylesheet RULE (`lightRuleLookup()`) instead, which is how a
     print capture gets light colours without flipping the whole app to light for a frame.
-22. **Restoring the theme after `new Chart(...)` returns is too early.** `mountChart` deliberately draws
+23. **Restoring the theme after `new Chart(...)` returns is too early.** `mountChart` deliberately draws
     on a later frame (it waits for the canvas to be connected), and a plugin that fills the plot area
     reads `theme.SURFACE` at DRAW time. A print capture that restored the palette synchronously produced
     charts with light axes on a dark background. `withPrintRendering` is `async` and awaits the whole
     capture for that reason — an easy "simplification" to make and a hard one to see.
-23. **A one-cell reportlab Table cannot split, whatever you set on it.** Splitting happens between
+24. **A one-cell reportlab Table cannot split, whatever you set on it.** Splitting happens between
     ROWS, so a card built as a single cell raises `LayoutError: too large on page` the moment its
     content exceeds one page. `components.result_card` therefore uses one row per content flowable,
     with `splitByRow=1, splitInRow=1` and the 14pt padding applied to the first and last rows only.
-24. **reportlab declares Helvetica and Times-Roman on pages that draw neither.** Three separate causes,
+25. **reportlab declares Helvetica and Times-Roman on pages that draw neither.** Three separate causes,
     each invisible: `CellStyle.fontname` defaults to Helvetica, so **every** Table needs an explicit
     `("FONT", …)` command even when all its cells are Paragraphs; `graphics.shapes.STATE_DEFAULTS`
     seeds Times-Roman into any page that renders a Drawing (the logo), fixed once in `ensure_fonts()`;
