@@ -11,6 +11,16 @@
 /** @type {{version: string, date: string, bullets: {group: string, text: string}[]}[]} newest first */
 export const RELEASES = [
   {
+    version: "1.0.6",
+    date: "2026-07-30",
+    bullets: [
+      { group: "Fixed", text: "Installing an update no longer opens the setup wizard. Choosing \"Restart to finish updating\" quit Gosset and then waited for someone to click through an installer; if you closed that window, you were left with no app running and the old version still installed." },
+      { group: "Fixed", text: "Gosset now asks about unsaved work before restarting to update in every case. Data typed straight into the worksheet did not count as work, so an update could restart over the top of it without asking." },
+      { group: "Fixed", text: "The update window shows only the release notes. It was also listing the download and Windows-warning instructions from the release page, including advice to download the installer by hand." },
+      { group: "Fixed", text: "Update installation no longer runs a signature check that cannot pass for these unsigned builds." },
+    ],
+  },
+  {
     version: "1.0.5",
     date: "2026-07-30",
     bullets: [
