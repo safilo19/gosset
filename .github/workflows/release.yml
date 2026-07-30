@@ -119,17 +119,51 @@ jobs:
           if (Test-Path (Join-Path $target 'windows-10\x64\signtool.exe')) {
             Write-Host 'winCodeSign cache seeded'
           } else {
-            Write-Host '::warning::winCodeSign cache seeding did not produce signtool.exe; relying on the no-op sign hook'
+            # Fail loudly. A silent warning here means the next step fails for a reason that LOOKS
+            # unrelated, and its real cause is three steps back and green.
+            Write-Host '::error::winCodeSign cache seeding did not produce signtool.exe'
+            exit 1
           }
 
       - name: Build the installer (electron-builder)
         working-directory: desktop
         # Unsigned on purpose — see the README. Left explicit so a future signing setup is one
         # secret and one line, not an archaeology exercise.
+        #
+        # GH_TOKEN is deliberately NOT passed. Publishing is this workflow's job (the
+        # softprops/action-gh-release step below), not electron-builder's — and handing it a token
+        # while also telling it `--publish never` is contradictory: the token is what makes it try to
+        # resolve a GitHub publish target, which it infers from package.json `repository`. That is the
+        # one environmental difference between this step and the identical local build that succeeds.
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx electron-builder --config electron-builder.config.cjs --publish never
+        shell: pwsh
+        # The output is echoed back as ::error:: annotations on failure, NOT just left in the log.
+        # Workflow logs need an authenticated request; annotations do not. So when this step fails,
+        # the reason is visible to anyone who can see the repository — including whoever is debugging
+        # it from outside CI, which is exactly the situation that made a previous failure here take
+        # three blind ten-minute iterations to chase.
+        run: |
+          # Actions runs pwsh with $ErrorActionPreference='Stop', and electron-builder writes its
+          # entire progress log to stderr. Without this, the first ordinary progress line would be
+          # promoted to a terminating error and the step would die before the build even got going —
+          # a self-inflicted failure that looks exactly like the one being diagnosed.
+          $ErrorActionPreference = 'Continue'
+          $log = Join-Path $env:RUNNER_TEMP 'electron-builder.log'
+          & npx electron-builder --config electron-builder.config.cjs --publish never *>&1 |
+            Tee-Object -FilePath $log
+          $code = $LASTEXITCODE
+          if ($code -ne 0) {
+            Write-Host "::group::electron-builder failed (exit $code)"
+            # Annotations are capped, so send the tail — the useful end — a line at a time, with the
+            # characters Actions treats as control sequences escaped.
+            Get-Content "$env:RUNNER_TEMP\electron-builder.log" -Tail 30 | ForEach-Object {
+              $line = $_ -replace '%', '%25' -replace "`r", ''
+              if ($line.Trim()) { Write-Host "::error::$line" }
+            }
+            Write-Host '::endgroup::'
+            exit $code
+          }
 
       - name: Collect the installer
         id: collect

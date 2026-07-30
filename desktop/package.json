@@ -5,6 +5,11 @@
   "description": "Gosset — a statistical analysis workbench",
   "license": "SEE LICENSE IN ../LICENSE",
   "private": true,
+  "author": "Safi",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/safilo19/personal-analytics-mcp.git"
+  },
   "main": "src/main.js",
   "type": "commonjs",
   "scripts": {
