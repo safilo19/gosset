@@ -217,7 +217,8 @@ A few rules that shaped the codebase, if you're reading it:
   dialogs post back for a refit, so the API stays stateless and a fitted model travels inside a saved
   project.
 
-`CLAUDE.md` documents the architecture and the traps in full.
+[`DESIGN.md`](DESIGN.md) documents the visual language — tokens, type, motion, the report surface and the
+ban list — and `CLAUDE.md` documents the architecture and the traps in full.
 
 ## Build from source
 
