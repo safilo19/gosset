@@ -2747,6 +2747,9 @@ const ACTIONS = {
   report: () => reportPane.open(),
   // Help
   about: openAboutWindow,
+  'whats-new': () => whatsNew.show({ wm }),
+  // A user-initiated check, which is the only kind allowed to report that it failed or found nothing.
+  'check-updates': () => updates.checkNow(),
   // Data
   import: () => openImportWindow(),
   summary: openSummaryWindow,

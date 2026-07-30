@@ -567,6 +567,12 @@ const WINDOW_ICONS = {
   'session-window': svg('<rect x="1.9" y="2.4" width="12.2" height="11.2" rx="1"/><path d="M1.9 8.9h12.2"/><path d="M4.1 10.9h4.4M4.1 12.4h6.4"/>'),
   // Help > About: the conventional info circle.
   about: svg(`<circle cx="8" cy="8" r="6.1"/><path d="M8 7.4v4.1"/>${dot(8, 4.9, 1)}`),
+  // Check for Updates. A circular arrow, NOT a downward arrow into a line: that reads as "download"
+  // and would be a look-alike for export/save, which are three items away in the same menu bar. The
+  // gap in the ring at the top-right is what the arrowhead sits in, so the two read as one stroke.
+  'check-updates': svg(
+    '<path d="M13.6 8a5.6 5.6 0 1 1-1.9-4.2"/><path d="M13.9 2.5v3.2h-3.2"/>',
+  ),
   // The gallery of icons itself.
   'icon-gallery': svg(`<rect x="2.1" y="2.1" width="4.9" height="4.9" rx="1"/><rect x="9" y="2.1" width="4.9" height="4.9" rx="1"/><rect x="2.1" y="9" width="4.9" height="4.9" rx="1"/><rect x="9" y="9" width="4.9" height="4.9" rx="1"/>${dot(4.55, 4.55, 1)}${dot(11.45, 11.45, 1)}`),
 };
