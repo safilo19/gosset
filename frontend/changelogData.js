@@ -11,6 +11,16 @@
 /** @type {{version: string, date: string, bullets: {group: string, text: string}[]}[]} newest first */
 export const RELEASES = [
   {
+    version: "1.0.1",
+    date: "2026-07-30",
+    bullets: [
+      { group: "Added", text: "Gosset now updates itself. It checks for new releases in the background and offers to install them, showing what changed before you decide. It never downloads anything without asking." },
+      { group: "Added", text: "A \"What's new\" window after each update, listing everything that changed since the version you were running — including any releases you skipped." },
+      { group: "Added", text: "File > Options has an Updates section: turn automatic checks off, check for one now, and see which version you are running." },
+      { group: "Added", text: "About now links to the release notes." },
+    ],
+  },
+  {
     version: "1.0.0",
     date: "2026-07-30",
     bullets: [
