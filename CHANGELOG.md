@@ -13,6 +13,12 @@ workflow copies that same section into the GitHub Release body and the app's "Wh
 these bullets are read by users three times over — write them accordingly. Three to eight per release.
 
 <!-- next-release -->
+## [1.0.8] - 2026-07-30
+
+### Fixed
+
+- A failed update check no longer writes the whole server response, including GitHub session cookies, into Gosset's log file.
+
 ## [1.0.7] - 2026-07-30
 
 ### Added
@@ -89,6 +95,7 @@ Gosset's first desktop release.
   the published requirements.
 - Reports are now written to a per-user folder instead of the application directory.
 
+[1.0.8]: https://github.com/safilo19/personal-analytics-mcp/releases/tag/v1.0.8
 [1.0.7]: https://github.com/safilo19/personal-analytics-mcp/releases/tag/v1.0.7
 [1.0.6]: https://github.com/safilo19/personal-analytics-mcp/releases/tag/v1.0.6
 [1.0.5]: https://github.com/safilo19/personal-analytics-mcp/releases/tag/v1.0.5
