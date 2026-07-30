@@ -87,7 +87,17 @@ contextBridge.exposeInMainWorld('gosset', {
     /** Quit and install. Call ONLY after the unsaved-work prompt has resolved. */
     install: () => ipcRenderer.invoke('gosset:updater-install'),
 
-    onAvailable: (fn) => ipcRenderer.on('gosset:update-available', (_e, p) => fn(p)),
+    /**
+     * Attach the update-available handler AND tell the main process the renderer is listening.
+     *
+     * The handshake is the point: the first check happens 3s after the window appears, before the
+     * renderer has finished starting, so the main process parks the offer until this fires. Without it
+     * a genuinely available update produced no popup at all.
+     */
+    onAvailable: (fn) => {
+      ipcRenderer.on('gosset:update-available', (_e, p) => fn(p));
+      ipcRenderer.send('gosset:updater-ready');
+    },
     onNotAvailable: (fn) => ipcRenderer.on('gosset:update-not-available', (_e, p) => fn(p)),
     onProgress: (fn) => ipcRenderer.on('gosset:update-progress', (_e, p) => fn(p)),
     onDownloaded: (fn) => ipcRenderer.on('gosset:update-downloaded', (_e, p) => fn(p)),

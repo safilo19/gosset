@@ -49,6 +49,29 @@ class Updater {
     this.downloaded = false;
     /** True while a check the USER asked for is in flight — the only kind that may report failure. */
     this.userInitiated = false;
+
+    /**
+     * The renderer has registered its update listeners.
+     *
+     * The first check fires 3s after the window is created, but the renderer only wires up its
+     * handlers after the blank worksheet and the Calc catalogue have loaded — which takes longer than
+     * that. So an offer sent on time reached a page that was not listening yet and was silently
+     * dropped: no popup, ever, for exactly the users on a slow first start. Same failure as a project
+     * arriving before app.js can take it, and the same fix — park it and flush on a handshake.
+     */
+    this.rendererReady = false;
+    /** An offer waiting for that handshake. */
+    this.parkedOffer = null;
+
+    /**
+     * Whether the USER asked for this download.
+     *
+     * Load-bearing, not defensive. autoDownload = false is supposed to guarantee it, but a build went
+     * out where a 186 MB update downloaded AND installed itself with nothing clicked — so the flag is
+     * no longer trusted on its own. Consent is now tracked here and enforced against the library's
+     * behaviour in check().
+     */
+    this.consented = false;
   }
 
   /** Available only in a packaged app: an unpackaged Electron has no installer to replace. */
@@ -59,6 +82,31 @@ class Updater {
   send(channel, payload) {
     const win = this.getWindow();
     if (win && !win.isDestroyed()) win.webContents.send(channel, payload);
+  }
+
+  /**
+   * Send an offer, or park it until the renderer says it is listening.
+   *
+   * Only the OFFER is parked. Progress and error events are fire-and-forget: by the time either can
+   * happen the user has clicked a button, so the renderer is provably listening.
+   */
+  offer(payload) {
+    if (!this.rendererReady) {
+      log.info(`[updater] renderer not ready; parking the offer of ${payload.version}`);
+      this.parkedOffer = payload;
+      return;
+    }
+    this.send('gosset:update-available', payload);
+  }
+
+  /** Called when the renderer has wired up its listeners. Flushes a parked offer. */
+  markRendererReady() {
+    this.rendererReady = true;
+    if (!this.parkedOffer) return;
+    const payload = this.parkedOffer;
+    this.parkedOffer = null;
+    log.info(`[updater] renderer ready; delivering the parked offer of ${payload.version}`);
+    this.send('gosset:update-available', payload);
   }
 
   /** Lazily require and configure electron-updater. */
@@ -91,12 +139,22 @@ class Updater {
     // build would mean a tampered installer could be accepted.
     autoUpdater.verifyUpdateCodeSignature = false;
 
+    // Read the flags BACK and log them. They were set above and assumed to have taken effect, and a
+    // shipped build then downloaded and installed an update with nothing clicked — with no
+    // quitAndInstall in the log, proving our own install path was never called. Assuming a setter
+    // worked is what made that a mystery instead of a one-line log entry.
+    log.info(
+      `[updater] flags: autoDownload=${autoUpdater.autoDownload} ` +
+        `autoInstallOnAppQuit=${autoUpdater.autoInstallOnAppQuit} ` +
+        `verifyUpdateCodeSignature=${autoUpdater.verifyUpdateCodeSignature}`,
+    );
+
     autoUpdater.on('update-available', (info) => {
       log.info(`[updater] update available: ${info.version}`);
       this.pending = info;
       // A user-initiated check always shows the dialog. An automatic one respects the snooze.
       if (this.userInitiated || !this.snoozedThisSession) {
-        this.send('gosset:update-available', {
+        this.offer({
           version: info.version,
           releaseDate: info.releaseDate || '',
           notes: normaliseNotes(info.releaseNotes),
@@ -190,7 +248,25 @@ class Updater {
 
     this.userInitiated = user;
     try {
-      await updater.checkForUpdates();
+      const result = await updater.checkForUpdates();
+
+      // ENFORCE consent, rather than trust autoDownload.
+      //
+      // checkForUpdates resolves with a downloadPromise when a download has been STARTED, which
+      // should only ever happen if autoDownload is true. A shipped build downloaded and installed
+      // 186 MB with nothing clicked, so the flag alone is not treated as sufficient any more: if a
+      // download is running and the user has not consented, cancel it. Cancelling also prevents the
+      // install-on-quit path, since electron-updater can only install what it finished downloading —
+      // which is what turned an unwanted download into an unwanted version change.
+      if (result && result.downloadPromise && !this.consented) {
+        log.error('[updater] a download started without consent — cancelling it');
+        if (result.cancellationToken) {
+          result.cancellationToken.cancel();
+        }
+        // Swallow the rejection the cancellation causes; it is expected, not a failure to report.
+        Promise.resolve(result.downloadPromise).catch(() => {});
+        this.downloading = false;
+      }
     } catch (err) {
       // checkForUpdates rejects AND emits 'error'; the handler above decides what the user sees, so
       // this only has to avoid an unhandled rejection.
@@ -198,10 +274,11 @@ class Updater {
     }
   }
 
-  /** Begin the download the user just consented to. */
+  /** Begin the download the user just consented to. The ONLY place `consented` is set. */
   async download() {
     const updater = this.init();
     if (!updater || this.downloading) return;
+    this.consented = true;
     this.downloading = true;
     this.send('gosset:update-progress', { percent: 0, transferred: 0, total: 0, bytesPerSecond: 0 });
     try {

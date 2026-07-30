@@ -286,6 +286,13 @@ function registerIpc() {
     log.info(`updater: automatic checks ${autoUpdateEnabled ? 'on' : 'off'}`);
   });
 
+  // The renderer's update listeners are attached. The first check fires 3s after the window is
+  // created, which is sooner than the renderer finishes starting, so an offer made before this point
+  // is parked rather than sent into a page that would drop it.
+  ipcMain.on('gosset:updater-ready', () => {
+    if (updater) updater.markRendererReady();
+  });
+
   ipcMain.handle('gosset:updater-check', async (_event, { user = false } = {}) => {
     if (!updater) return { started: false, reason: 'unsupported' };
     await updater.check({ user });

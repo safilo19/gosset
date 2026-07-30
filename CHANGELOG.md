@@ -13,6 +13,13 @@ workflow copies that same section into the GitHub Release body and the app's "Wh
 these bullets are read by users three times over — write them accordingly. Three to eight per release.
 
 <!-- next-release -->
+## [1.0.4] - 2026-07-30
+
+### Fixed
+
+- An update could download and install itself without asking. Gosset now refuses any download it did not get permission for, and cancels one that starts on its own.
+- The "a new version is available" window could fail to appear even when there was one, if the app was still starting when the check finished.
+
 ## [1.0.3] - 2026-07-30
 
 ### Fixed
@@ -61,6 +68,7 @@ Gosset's first desktop release.
   the published requirements.
 - Reports are now written to a per-user folder instead of the application directory.
 
+[1.0.4]: https://github.com/safilo19/personal-analytics-mcp/releases/tag/v1.0.4
 [1.0.3]: https://github.com/safilo19/personal-analytics-mcp/releases/tag/v1.0.3
 [1.0.2]: https://github.com/safilo19/personal-analytics-mcp/releases/tag/v1.0.2
 [1.0.1]: https://github.com/safilo19/personal-analytics-mcp/releases/tag/v1.0.1
