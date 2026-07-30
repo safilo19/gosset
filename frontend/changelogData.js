@@ -11,6 +11,14 @@
 /** @type {{version: string, date: string, bullets: {group: string, text: string}[]}[]} newest first */
 export const RELEASES = [
   {
+    version: "1.0.2",
+    date: "2026-07-30",
+    bullets: [
+      { group: "Added", text: "The Help menu now has \"What's New\" and \"Check for Updates\", so you no longer have to open About to find either." },
+      { group: "Changed", text: "Checking for updates from the Help menu tells you when you are already up to date, instead of doing nothing visible." },
+    ],
+  },
+  {
     version: "1.0.1",
     date: "2026-07-30",
     bullets: [
