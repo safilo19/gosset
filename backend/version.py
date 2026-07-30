@@ -8,4 +8,4 @@ It is committed rather than generated at import time so that a plain `uvicorn ba
 checkout needs no Node.js to start.
 """
 
-VERSION = "1.0.6"
+VERSION = "1.0.7"

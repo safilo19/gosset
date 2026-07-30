@@ -11,6 +11,13 @@
 /** @type {{version: string, date: string, bullets: {group: string, text: string}[]}[]} newest first */
 export const RELEASES = [
   {
+    version: "1.0.7",
+    date: "2026-07-30",
+    bullets: [
+      { group: "Added", text: "The update window now tells you how large the download is before you start it, which matters on a metered or slow connection." },
+    ],
+  },
+  {
     version: "1.0.6",
     date: "2026-07-30",
     bullets: [
