@@ -11,6 +11,14 @@
 /** @type {{version: string, date: string, bullets: {group: string, text: string}[]}[]} newest first */
 export const RELEASES = [
   {
+    version: "1.0.4",
+    date: "2026-07-30",
+    bullets: [
+      { group: "Fixed", text: "An update could download and install itself without asking. Gosset now refuses any download it did not get permission for, and cancels one that starts on its own." },
+      { group: "Fixed", text: "The \"a new version is available\" window could fail to appear even when there was one, if the app was still starting when the check finished." },
+    ],
+  },
+  {
     version: "1.0.3",
     date: "2026-07-30",
     bullets: [
