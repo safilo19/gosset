@@ -238,6 +238,12 @@ function describeRemoteError(body, status) {
   if (/OPERATION_NOT_ALLOWED/i.test(code)) {
     return 'Google sign-in is not enabled for this Firebase project. Enable it under Authentication → Sign-in method.';
   }
+  if (/client_secret is missing/i.test(code)) {
+    return (
+      'Google needs the OAuth client secret as well as the client ID. Copy it from the same "Desktop app" ' +
+      'client in the Google Cloud console into clientSecret in firebase.config.json.'
+    );
+  }
   if (/invalid_client|unauthorized_client/i.test(code)) {
     return 'The OAuth client ID was rejected. Check that it is a "Desktop app" client and matches firebase.config.json.';
   }

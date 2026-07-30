@@ -59,10 +59,31 @@ confusing: a "Web application" client rejects the loopback redirect Gosset uses 
    sign-in will be refused for accounts you have not listed.
 3. **Create credentials → OAuth client ID**.
 4. **Application type: Desktop app**. Name it `Gosset desktop`.
-5. **Create**, then copy the **Client ID** (it ends in `.apps.googleusercontent.com`).
+5. **Create**, then copy **both** the **Client ID** (ends in `.apps.googleusercontent.com`) **and the
+   Client secret**.
 
-You can ignore the client secret. Gosset uses PKCE, and Google does not treat an installed-app secret as
-confidential.
+**You need the client secret, despite PKCE.** This is worth stating plainly because the opposite is
+widely assumed: Google's token endpoint rejects the exchange with `client_secret is missing` if you omit
+it, even for a Desktop client sending a valid PKCE verifier. Verified against the live endpoint, not
+inferred from the docs.
+
+**Treat it as a secret anyway.** Two true things pull in opposite directions here, and the safe reading is
+the cautious one:
+
+- Google's own spec for native apps says an installed-app secret *cannot* be kept confidential, because
+  it ships inside software users can read
+  ([docs](https://developers.google.com/identity/protocols/oauth2/native-app)). PKCE, not the secret, is
+  what protects the code exchange.
+- Google's console nonetheless says *"Secrets should never be checked into code repositories."* Also
+  right: a leaked secret lets someone impersonate **your app** on a consent screen, which is a phishing
+  problem even though it grants no access to user data.
+
+So: fine in `firebase.config.json` on your own machine, which is why that file is **gitignored**. Do not
+commit it, and do not paste it into an issue.
+
+**Copy it the moment it is shown.** Google no longer lets you view a secret after creation — the console
+says so outright. If you missed it, open the client and use **+ Add secret**; a second secret is created
+alongside the first and both work, so nothing breaks while you rotate.
 
 ## 5. Publish the consent screen — needed for anyone but you
 
@@ -170,6 +191,7 @@ returns `403: disallowed_useragent`. Opening the real browser is the supported p
 | *Sign-in is not set up in this build* | No `firebase.config.json` found, or it lacks `apiKey`/`clientId` |
 | `OPERATION_NOT_ALLOWED` | Google provider not enabled — step 2 |
 | `redirect_uri_mismatch` | The OAuth client is not type **Desktop app** — step 4 |
+| `client_secret is missing` | `clientSecret` empty in firebase.config.json — it IS required, see step 4 |
 | `invalid_client` | `clientId` does not match the project, or is a Web client |
 | `API key not valid` | `apiKey` belongs to a different project |
 | `403: access_denied` for other users | Consent screen still in **Testing** — publish it, step 5 |

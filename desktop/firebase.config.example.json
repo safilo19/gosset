@@ -7,8 +7,9 @@
     "None of these are secrets. A Firebase web apiKey and an OAuth clientId are public identifiers —",
     "they appear in every shipped client and are meant to. What protects the project is the Firebase",
     "security rules and the fact that this OAuth client can only redirect to loopback addresses.",
-    "clientSecret is optional: Google issues one for 'Desktop app' clients and explicitly does not",
-    "treat it as confidential, and this app uses PKCE instead, so leaving it empty is fine.",
+    "clientSecret is REQUIRED, despite PKCE: Google's token endpoint rejects the exchange with",
+    "'client_secret is missing' without it, even for a Desktop client. It is still not confidential —",
+    "Google ships it inside installed apps and says so — but it must be present.",
     "",
     "Gosset also reads GOSSET_FIREBASE_API_KEY / _CLIENT_ID / _CLIENT_SECRET / _PROJECT_ID from the",
     "environment, which is how a CI build can configure itself without a file."
