@@ -64,7 +64,29 @@ confusing: a "Web application" client rejects the loopback redirect Gosset uses 
 You can ignore the client secret. Gosset uses PKCE, and Google does not treat an installed-app secret as
 confidential.
 
-## 5. Give the values to Gosset
+## 5. Publish the consent screen — needed for anyone but you
+
+This is the step that decides whether **other people** can sign in, and it is easy to miss because
+sign-in will already work for you without it.
+
+A new OAuth consent screen starts in **Testing** mode, where Google permits only accounts you have
+listed as test users. Everyone else gets `403: access_denied`, which reads like a bug in the app.
+
+1. Go to <https://console.cloud.google.com/apis/credentials/consent>.
+2. Check **Publishing status**.
+   - **Testing** → only your listed test users can sign in.
+   - **In production** → any Google account can sign in.
+3. If it says Testing, click **Publish app** and confirm.
+
+**No Google review is required for this app.** Verification is only demanded for "sensitive" or
+"restricted" scopes — reading someone's Drive, Gmail, contacts. Gosset asks for `openid`, `email` and
+`profile`, which are the non-sensitive basics, so publishing takes effect immediately.
+
+Users will see an "unverified app" notice on the consent screen unless you later complete Google's brand
+verification. It is cosmetic, it does not block sign-in, and it is the same trade-off as the unsigned
+installer: stated plainly rather than worked around.
+
+## 6. Give the values to Gosset
 
 Copy the example file and fill it in:
 
@@ -150,7 +172,8 @@ returns `403: disallowed_useragent`. Opening the real browser is the supported p
 | `redirect_uri_mismatch` | The OAuth client is not type **Desktop app** — step 4 |
 | `invalid_client` | `clientId` does not match the project, or is a Web client |
 | `API key not valid` | `apiKey` belongs to a different project |
-| `403: access_denied` | Consent screen is in Testing and your address is not a listed test user — step 4.2 |
+| `403: access_denied` for other users | Consent screen still in **Testing** — publish it, step 5 |
+| `403: access_denied` for you | Consent screen in Testing and your address is not a listed test user — step 4.2 |
 | Browser opens but nothing happens | The one-shot server has a five-minute timeout; try again |
 
 Gosset translates the first several of these into plain-language messages in the Account panel, so you
