@@ -1,7 +1,7 @@
 {
   "name": "gosset",
   "productName": "Gosset",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Gosset — a statistical analysis workbench",
   "license": "SEE LICENSE IN ../LICENSE",
   "private": true,

@@ -11,6 +11,13 @@
 /** @type {{version: string, date: string, bullets: {group: string, text: string}[]}[]} newest first */
 export const RELEASES = [
   {
+    version: "1.0.5",
+    date: "2026-07-30",
+    bullets: [
+      { group: "Changed", text: "The update window now names the version you are coming from as well as the one you are going to, so it is clear what the jump is." },
+    ],
+  },
+  {
     version: "1.0.4",
     date: "2026-07-30",
     bullets: [
