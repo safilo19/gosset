@@ -57,6 +57,20 @@ export const VERSION = '${version}';
   },
 ];
 
+/**
+ * Compare ignoring line endings.
+ *
+ * These files are written with \n, but git normalises to CRLF on checkout for a Windows working tree
+ * — so on a fresh clone (and on a CI runner) the bytes on disk differ from `body` even though the
+ * VERSION in them is identical. A byte-exact comparison therefore reported "drift" on a perfectly
+ * consistent checkout, which is exactly how this check failed on its first real run while passing
+ * locally, where the files were still as this script had written them.
+ *
+ * The check's job is to catch a version number that disagrees with package.json, and a line ending
+ * is not a version number.
+ */
+const sameContent = (a, b) => a.replace(/\r\n/g, '\n') === b.replace(/\r\n/g, '\n');
+
 let drifted = 0;
 for (const { path, body } of targets) {
   let current = null;
@@ -65,7 +79,9 @@ for (const { path, body } of targets) {
   } catch {
     /* first run */
   }
-  if (current === body) continue;
+  // Skip rewriting a file that only differs by line endings, too: rewriting it would produce a
+  // spurious diff on every Windows checkout.
+  if (current !== null && sameContent(current, body)) continue;
 
   if (checkOnly) {
     console.error(`DRIFT  ${path} does not match version ${version} from package.json`);
@@ -82,6 +98,6 @@ if (checkOnly) {
     process.exit(1);
   }
   console.log(`version ${version} is consistent across backend/version.py and frontend/brand/version.js`);
-} else if (targets.every(({ path, body }) => readFileSync(path, 'utf8') === body)) {
+} else if (targets.every(({ path, body }) => sameContent(readFileSync(path, 'utf8'), body))) {
   console.log(`version ${version} is up to date`);
 }
