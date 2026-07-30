@@ -128,7 +128,7 @@ function openUpdateWindow(info) {
         h('p', { class: 'update-title', text: `${brand.name} ${info.version} is available` }),
         h('p', {
           class: 'update-sub',
-          text: `You have ${info.currentVersion || brand.version}.`,
+          text: `Updating from ${info.currentVersion || brand.version} to ${info.version}.`,
         }),
       ]),
     ]),
