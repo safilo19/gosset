@@ -24,6 +24,13 @@ const { app } = require('electron');
 
 const { log } = require('./log');
 
+/**
+ * Replaces NsisUpdater's Authenticode check for these unsigned builds. Resolving to null means "no
+ * problem found". Kept as a named function so the flag log can tell whether the override actually took —
+ * assigning `false` here silently did nothing, and only a readback revealed it.
+ */
+const signatureCheckOverride = () => Promise.resolve(null);
+
 /** 3s after the window is ready: late enough that startup is done, early enough to be this session. */
 const FIRST_CHECK_DELAY_MS = 3_000;
 /** Then every 4 hours, for the people who leave it open for days. */
@@ -132,12 +139,18 @@ class Updater {
       debug: () => {},
     };
 
-    // The builds are UNSIGNED (see the README), and Windows update verification checks the new
-    // installer's signature against the running app's. With nothing to compare, that check fails and
-    // every update is rejected — so it is disabled explicitly rather than left to a default.
-    // FLIP THIS TO true the day a code-signing certificate is purchased; leaving it false with a signed
-    // build would mean a tampered installer could be accepted.
-    autoUpdater.verifyUpdateCodeSignature = false;
+    // The builds are UNSIGNED (see the README), and NsisUpdater verifies the downloaded installer's
+    // Authenticode signature against the running app's publisher before installing it.
+    //
+    // `verifyUpdateCodeSignature` is a METHOD, not a boolean flag. Assigning `false` to it does not
+    // disable anything — the readback below showed the default verifier function still in place after
+    // the assignment, which is how this was caught. It has to be REPLACED with a function that resolves
+    // to null, null meaning "no problem found".
+    //
+    // TO RE-ENABLE the day a code-signing certificate is bought: delete this override entirely and let
+    // the default verifier run. Leaving it in place with a signed build would mean a tampered installer
+    // could be accepted, which is the whole point of the check.
+    autoUpdater.verifyUpdateCodeSignature = signatureCheckOverride;
 
     // Read the flags BACK and log them. They were set above and assumed to have taken effect, and a
     // shipped build then downloaded and installed an update with nothing clicked — with no
@@ -146,7 +159,9 @@ class Updater {
     log.info(
       `[updater] flags: autoDownload=${autoUpdater.autoDownload} ` +
         `autoInstallOnAppQuit=${autoUpdater.autoInstallOnAppQuit} ` +
-        `verifyUpdateCodeSignature=${autoUpdater.verifyUpdateCodeSignature}`,
+        // Reported as overridden/default rather than dumped: printing the function body filled the log
+        // line with minified library source and buried the two values that matter.
+        `signatureCheck=${autoUpdater.verifyUpdateCodeSignature === signatureCheckOverride ? 'overridden (unsigned build)' : 'DEFAULT — expected to be overridden'}`,
     );
 
     autoUpdater.on('update-available', (info) => {

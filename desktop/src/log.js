@@ -8,7 +8,7 @@
  * per-user state and truncated at startup so it stays readable rather than becoming an archive.
  */
 
-const { appendFileSync, mkdirSync, writeFileSync } = require('node:fs');
+const { appendFileSync, copyFileSync, existsSync, mkdirSync, writeFileSync } = require('node:fs');
 const { join } = require('node:path');
 
 let logPath = null;
@@ -31,11 +31,24 @@ function write(level, message) {
 }
 
 const log = {
-  /** Called once the app knows its userData directory. */
+  /**
+   * Called once the app knows its userData directory.
+   *
+   * The previous run's log is KEPT as gosset.prev.log before this one is truncated. That is not
+   * belt-and-braces: an auto-update restarts the app, so the launch immediately after anything
+   * interesting is the launch that would erase the evidence of it. Truncating unconditionally sent a
+   * real investigation down the wrong path — a grep for a line from the previous session found nothing
+   * and was read as "that code never ran", when the file had simply been overwritten by the restart.
+   */
   init(userDataDir) {
     try {
       mkdirSync(userDataDir, { recursive: true });
       logPath = join(userDataDir, 'gosset.log');
+      try {
+        if (existsSync(logPath)) copyFileSync(logPath, join(userDataDir, 'gosset.prev.log'));
+      } catch {
+        /* no previous log, or it is locked — not worth failing startup over */
+      }
       writeFileSync(logPath, `${stamp()}  ---   Gosset starting\n`, 'utf8');
     } catch {
       logPath = null;
