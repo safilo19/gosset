@@ -13,6 +13,13 @@ workflow copies that same section into the GitHub Release body and the app's "Wh
 these bullets are read by users three times over — write them accordingly. Three to eight per release.
 
 <!-- next-release -->
+## [1.0.3] - 2026-07-30
+
+### Fixed
+
+- Gosset no longer forgets your settings when it restarts. The theme, the options in File > Options and the recent-files list were all being reset on every launch.
+- Because of that same problem, the "What's new" window could never appear after an update. It now does.
+
 ## [1.0.2] - 2026-07-30
 
 ### Added
@@ -54,6 +61,7 @@ Gosset's first desktop release.
   the published requirements.
 - Reports are now written to a per-user folder instead of the application directory.
 
+[1.0.3]: https://github.com/safilo19/personal-analytics-mcp/releases/tag/v1.0.3
 [1.0.2]: https://github.com/safilo19/personal-analytics-mcp/releases/tag/v1.0.2
 [1.0.1]: https://github.com/safilo19/personal-analytics-mcp/releases/tag/v1.0.1
 [1.0.0]: https://github.com/safilo19/personal-analytics-mcp/releases/tag/v1.0.0

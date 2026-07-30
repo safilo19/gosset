@@ -23,26 +23,69 @@ const HEALTH_TIMEOUT_MS = 90_000;
 const HEALTH_INTERVAL_MS = 250;
 
 /**
- * An OS-assigned free port.
+ * The port the app prefers, every launch.
  *
- * Binding port 0 and reading back what the kernel chose, then closing, is the only way to get a port
- * that is actually free — a "pick a random number and hope" loop races with every other process on
- * the machine. There is still a window between close() and the sidecar binding it, which is why
- * waitForHealth() checks the pid it gets back (see main.js) rather than trusting that whatever
- * answers on the port is ours.
+ * THE PORT IS PART OF THE APP'S IDENTITY, and that is not obvious. The window loads
+ * `http://127.0.0.1:<port>`, and Chromium partitions localStorage **by origin** — so a different port
+ * means a different storage bucket. The app keeps every File > Options preference, the theme, the
+ * recent-files list and the "last version run" marker in localStorage. With an OS-assigned port those
+ * all silently reset on every launch: the user sets a theme, restarts, and it is gone, with nothing to
+ * suggest why. It also meant the "What's new" window could never appear, because the version marker it
+ * compares against was always absent.
+ *
+ * The fix is a stable origin, so the port is fixed rather than requested from the kernel. Nothing is
+ * lost by fixing it: the single-instance lock means Gosset never competes with itself for this port.
+ *
+ * 48219 is arbitrary but deliberately unremarkable — high, outside the ephemeral range Windows hands
+ * out by default (49152+), and not a port any common development server claims.
  */
-function findFreePort() {
+const PREFERRED_PORT = 48219;
+/** How many ports past the preferred one to try before giving up on a stable origin. */
+const PORT_SCAN = 8;
+
+/** Can we bind this port on loopback right now? */
+function canBind(port) {
+  return new Promise((resolve) => {
+    const server = createServer();
+    server.unref();
+    server.once('error', () => resolve(false));
+    // Bind loopback specifically: the sidecar binds 127.0.0.1, so a port free on 0.0.0.0 is not
+    // necessarily the same question.
+    server.listen(port, '127.0.0.1', () => server.close(() => resolve(true)));
+  });
+}
+
+/** An OS-assigned free port — the last resort, which costs a stable origin. */
+function anyFreePort() {
   return new Promise((resolve, reject) => {
     const server = createServer();
     server.unref();
     server.on('error', reject);
-    // Bind loopback specifically: the sidecar binds 127.0.0.1, so a port free on 0.0.0.0 is not
-    // necessarily the same question.
     server.listen(0, '127.0.0.1', () => {
       const { port } = server.address();
       server.close(() => resolve(port));
     });
   });
+}
+
+/**
+ * The port to serve on: the preferred one if it is free, then a short deterministic walk, and only
+ * then whatever the kernel offers.
+ *
+ * The walk is deterministic rather than random for the same reason the first choice is fixed — a
+ * machine where 48219 is permanently taken should still land on the SAME fallback every launch and keep
+ * its settings. Falling through to an arbitrary port is logged, because it has a consequence the user
+ * would otherwise experience as "the app forgot my preferences".
+ *
+ * There is still a window between close() and the sidecar binding it, which is why waitForHealth()
+ * checks the pid it gets back rather than trusting that whatever answers on the port is ours.
+ */
+async function choosePort() {
+  for (let port = PREFERRED_PORT; port < PREFERRED_PORT + PORT_SCAN; port += 1) {
+    if (await canBind(port)) return { port, stable: true };
+  }
+  const port = await anyFreePort();
+  return { port, stable: false };
 }
 
 /** Where the frozen sidecar lives, in an installed app and in a dev checkout. */
@@ -150,7 +193,15 @@ class Sidecar {
   }
 
   async start() {
-    this.port = await findFreePort();
+    const chosen = await choosePort();
+    this.port = chosen.port;
+    if (!chosen.stable) {
+      log.error(
+        `port ${PREFERRED_PORT}-${PREFERRED_PORT + PORT_SCAN - 1} are all in use, falling back to ${this.port}. ` +
+          `Preferences and the recent-files list are stored per origin, so they will not carry over from ` +
+          `previous launches while this is the case.`,
+      );
+    }
 
     const target = resolveSidecarPath(this.app) || resolvePythonFallback(this.repoRoot);
     if (!target) {
@@ -244,4 +295,4 @@ class Sidecar {
   }
 }
 
-module.exports = { Sidecar, findFreePort, probeHealth };
+module.exports = { Sidecar, choosePort, probeHealth, PREFERRED_PORT };
