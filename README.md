@@ -330,12 +330,6 @@ app's "What's new" window.
 The release is refused before anything is built if the tag disagrees with `package.json`, if the
 changelog section is missing or still holds its placeholder, or if the update feed was not produced.
 
-### A note on names
-
-The repository directory and the Python packages are still called `personal-analytics-mcp` and
-`analytics_mcp`. That is deliberate: renaming module paths and endpoints would risk breaking installs
-and MCP client configurations for no user-visible benefit. "Gosset" is the product name.
-
 ## License
 
 **Source-available, all rights reserved** — see [LICENSE](LICENSE).
