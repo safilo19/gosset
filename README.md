@@ -26,10 +26,11 @@ validated, the numerical limits, and the gaps.
 
 <div align="center">
 
-<video src="https://github.com/safilo19/gosset/raw/main/docs/media/gosset-demo.mp4" poster="https://github.com/safilo19/gosset/raw/main/docs/media/gosset-demo-poster.jpg" width="90%" controls muted playsinline></video>
+<a href="https://github.com/safilo19/gosset/blob/main/docs/media/gosset-demo.mp4">
+<img src="https://github.com/safilo19/gosset/raw/main/docs/media/gosset-demo-poster.jpg" width="90%" alt="Watch the one-minute Gosset tour — six menus, 239 procedures, one instrument">
+</a>
 
-<sub>A one-minute tour — six menus, 239 procedures, one instrument.
-▶ <a href="https://github.com/safilo19/gosset/raw/main/docs/media/gosset-demo.mp4">Play the video</a> if it doesn't load inline.</sub>
+<sub>▶ <a href="https://github.com/safilo19/gosset/blob/main/docs/media/gosset-demo.mp4">Watch the one-minute tour</a> — six menus, 239 procedures, one instrument.</sub>
 
 </div>
 
