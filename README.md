@@ -27,10 +27,10 @@ validated, the numerical limits, and the gaps.
 <div align="center">
 
 <a href="https://github.com/safilo19/gosset/blob/main/docs/media/gosset-demo.mp4">
-<img src="https://github.com/safilo19/gosset/raw/main/docs/media/gosset-demo-poster.jpg" width="90%" alt="Watch the one-minute Gosset tour — six menus, 239 procedures, one instrument">
+<img src="https://github.com/safilo19/gosset/raw/main/docs/media/gosset-demo-hero.webp" width="90%" alt="Gosset — a statistical analysis workbench: the mark draws, a worksheet loads, 239 procedures across six menus">
 </a>
 
-<sub>▶ <a href="https://github.com/safilo19/gosset/blob/main/docs/media/gosset-demo.mp4">Watch the one-minute tour</a> — six menus, 239 procedures, one instrument.</sub>
+<sub>▶ <a href="https://github.com/safilo19/gosset/blob/main/docs/media/gosset-demo.mp4">Watch the full one-minute tour with sound</a> — regression, ANOVA, the Calculator, graphs and a typeset report.</sub>
 
 </div>
 
