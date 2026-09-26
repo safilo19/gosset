@@ -13,9 +13,25 @@ No subscription. No account needed. Your data never leaves your machine.
 <sub>Named for William Sealy Gosset, who published the t-distribution as "Student" in 1908 —
 because his employer would not let him publish under his own name.</sub>
 
+[![Tests](https://github.com/safilo19/personal-analytics-mcp/actions/workflows/tests.yml/badge.svg)](https://github.com/safilo19/personal-analytics-mcp/actions/workflows/tests.yml)
+
+**Validated against NIST StRD** — the statistical engine is checked on every commit against the
+National Institute of Standards and Technology's certified reference datasets, and against published
+worked examples with citations. [**VALIDATION.md**](VALIDATION.md) lists every procedure, how it is
+validated, the numerical limits, and the gaps.
+
 </div>
 
 ---
+
+<div align="center">
+
+<video src="https://github.com/safilo19/personal-analytics-mcp/raw/main/docs/media/gosset-demo.mp4" poster="https://github.com/safilo19/personal-analytics-mcp/raw/main/docs/media/gosset-demo-poster.jpg" width="90%" controls muted playsinline></video>
+
+<sub>A one-minute tour — six menus, 239 procedures, one instrument.
+▶ <a href="https://github.com/safilo19/personal-analytics-mcp/raw/main/docs/media/gosset-demo.mp4">Play the video</a> if it doesn't load inline.</sub>
+
+</div>
 
 <div align="center">
 <img src="docs/screenshots/worksheet-light.jpg" width="90%" alt="The Gosset worksheet with a factorial dataset loaded">
@@ -168,6 +184,41 @@ failed.
 Charts are re-rendered for export at 2× in the light palette, so a report exported from dark mode still
 has light figures, typeset for paper rather than for a 300-pixel panel.
 
+## Validation
+
+A statistics package is worth what its arithmetic is worth, so the arithmetic is checked against
+other people's answers rather than against itself.
+
+**NIST StRD.** The National Institute of Standards and Technology publishes datasets together with
+values computed in multiple-precision arithmetic, for exactly this purpose. All 31 are committed and
+run on every push: 9 univariate summary sets, 11 linear regressions, 11 one-way ANOVAs. They are
+graded by difficulty on purpose — Longley is the near-collinear series that broke the regression
+routines of the 1960s — and the suite records the number of significant digits achieved on each of
+the hard ones instead of asserting a pass and moving on.
+
+**Published worked examples.** Student's 1908 sleep data, Anscombe's quartet, Fisher's iris, Mendel's
+peas, Bortkiewicz's horse kicks, the Clopper–Pearson interval, Grubbs' test from the NIST handbook —
+each with its citation in the reference file's own header, and each compared with a formula written
+out longhand rather than with a second call to the same library function.
+
+**Snapshots and properties** for the rest. Bootstrap, randomization tests, k-means, RFM and AutoML
+have no reference value, so they get fixed-seed snapshots plus assertions that hold for any seed: a
+bootstrap interval contains its estimate, a permutation p-value matches the exact answer on a case
+small enough to enumerate by hand, clusters partition every row. Every result payload in the app,
+from every dialog, is walked for p-values outside [0, 1], negative standard errors, R² above 1 and
+inverted confidence intervals.
+
+**The gaps are published too.** [VALIDATION.md](VALIDATION.md) is generated from the test metadata,
+so a procedure with no reference value is listed as such, and four real defects the suite found are
+described with their effects. A release cannot ship with a failing statistical test: the release
+workflow runs this suite before it builds an installer.
+
+```
+pip install -r requirements.txt -r requirements-dev.txt
+pytest                      # the whole suite, offline, about 90 seconds
+pytest -m nist              # only the NIST-certified checks
+```
+
 ## Architecture
 
 ```
@@ -218,7 +269,8 @@ A few rules that shaped the codebase, if you're reading it:
   project.
 
 [`DESIGN.md`](DESIGN.md) documents the visual language — tokens, type, motion, the report surface and the
-ban list — and `CLAUDE.md` documents the architecture and the traps in full.
+ban list — [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) the architecture in full, and
+[`docs/TRAPS.md`](docs/TRAPS.md) the failures that print no error message.
 
 ## Build from source
 
