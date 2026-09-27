@@ -1,0 +1,63 @@
+{
+ "_contract": "A fixed seed and a committed input must give this output. If this file needs to change, say why in the commit message - a diff here is a change in what the software computes.",
+ "_snapshot": "randomization_2means_sleep",
+ "_what": "Calc > Resampling > Randomization Test for Two Means, sleep drug1 vs drug2, base 12345",
+ "value": {
+  "highlights": [
+   {
+    "label": "Observed difference in means",
+    "value": -1.5799999999999996
+   },
+   {
+    "label": "P-Value",
+    "tone": null,
+    "value": 0.07892107892107893
+   },
+   {
+    "decimals": 0,
+    "label": "Resamples",
+    "value": 1000
+   },
+   {
+    "decimals": 0,
+    "label": "As extreme",
+    "value": 78
+   }
+  ],
+  "observed": -1.5799999999999996,
+  "p_value": 0.07892107892107893,
+  "procedure": "randomization_2means",
+  "resamples": 1000,
+  "tables": [
+   {
+    "rows": [
+     {
+      "Alternative": "two-sided",
+      "As extreme or more": 78,
+      "Null value": 0.0,
+      "Observed": -1.5799999999999996,
+      "P-Value": 0.07892107892107893,
+      "Resamples": 1000,
+      "Statistic": "difference in means"
+     }
+    ],
+    "title": "Randomization test"
+   },
+   {
+    "rows": [
+     {
+      "Mean": 0.75,
+      "N": 10,
+      "Sample": "drug1"
+     },
+     {
+      "Mean": 2.3299999999999996,
+      "N": 10,
+      "Sample": "drug2"
+     }
+    ],
+    "title": "Samples"
+   }
+  ]
+ }
+}

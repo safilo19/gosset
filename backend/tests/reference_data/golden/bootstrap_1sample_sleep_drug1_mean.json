@@ -1,0 +1,59 @@
+{
+ "_contract": "A fixed seed and a committed input must give this output. If this file needs to change, say why in the commit message - a diff here is a change in what the software computes.",
+ "_snapshot": "bootstrap_1sample_sleep_drug1_mean",
+ "_what": "Calc > Resampling > Bootstrap for 1-Sample Mean, sleep drug1, 1000 resamples, base 12345",
+ "value": {
+  "bootstrap_se": 0.5302412202494745,
+  "ci": [
+   -0.23049999999999954,
+   1.81025
+  ],
+  "confidence_level": 0.95,
+  "highlights": [
+   {
+    "label": "Observed mean",
+    "value": 0.75
+   },
+   {
+    "label": "Bootstrap SE",
+    "value": 0.5302412202494745
+   },
+   {
+    "label": "95% CI low",
+    "value": -0.23049999999999954
+   },
+   {
+    "label": "95% CI high",
+    "value": 1.81025
+   }
+  ],
+  "observed": 0.75,
+  "procedure": "bootstrap_1sample",
+  "resamples": 1000,
+  "tables": [
+   {
+    "rows": [
+     {
+      "95% percentile CI": "(-0.2305, 1.81025)",
+      "Bootstrap SE": 0.5302412202494745,
+      "Bootstrap mean": 0.7407100000000001,
+      "Observed": 0.75,
+      "Resamples": 1000,
+      "Statistic": "mean"
+     }
+    ],
+    "title": "Resampling summary"
+   },
+   {
+    "rows": [
+     {
+      "Column": "drug1",
+      "N": 10,
+      "Observed mean": 0.75
+     }
+    ],
+    "title": "Sample"
+   }
+  ]
+ }
+}

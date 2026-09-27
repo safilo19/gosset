@@ -1,0 +1,59 @@
+{
+ "_contract": "A fixed seed and a committed input must give this output. If this file needs to change, say why in the commit message - a diff here is a change in what the software computes.",
+ "_snapshot": "randomization_1mean_sleep_drug1",
+ "_what": "Calc > Resampling > Randomization Test for One Mean, sleep drug1 against 0, base 12345",
+ "value": {
+  "highlights": [
+   {
+    "label": "Observed mean",
+    "value": 0.75
+   },
+   {
+    "label": "P-Value",
+    "tone": null,
+    "value": 0.16183816183816183
+   },
+   {
+    "decimals": 0,
+    "label": "Resamples",
+    "value": 1000
+   },
+   {
+    "decimals": 0,
+    "label": "As extreme",
+    "value": 161
+   }
+  ],
+  "observed": 0.75,
+  "p_value": 0.16183816183816183,
+  "procedure": "randomization_1mean",
+  "resamples": 1000,
+  "tables": [
+   {
+    "rows": [
+     {
+      "Alternative": "two-sided",
+      "As extreme or more": 161,
+      "Null value": 0.0,
+      "Observed": 0.75,
+      "P-Value": 0.16183816183816183,
+      "Resamples": 1000,
+      "Statistic": "mean"
+     }
+    ],
+    "title": "Randomization test"
+   },
+   {
+    "rows": [
+     {
+      "Column": "drug1",
+      "Hypothesized mean": 0.0,
+      "N": 10,
+      "Observed mean": 0.75
+     }
+    ],
+    "title": "Sample"
+   }
+  ]
+ }
+}

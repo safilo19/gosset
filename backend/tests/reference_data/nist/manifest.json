@@ -1,0 +1,255 @@
+{
+  "source": "NIST/ITL Statistical Reference Datasets (StRD)",
+  "citation": "National Institute of Standards and Technology, Information Technology Laboratory. Statistical Reference Datasets. https://www.itl.nist.gov/div898/strd/ (accessed 2026-07-30).",
+  "note": "Files are byte-exact copies of the NIST originals apart from CRLF->LF line endings, so each can be diffed against its URL. Provenance is here rather than in a header comment inside the data files for exactly that reason.",
+  "datasets": [
+    {
+      "name": "PiDigits",
+      "path": "univariate/PiDigits.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/univ/data/PiDigits.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "sample mean, sample standard deviation, lag-1 autocorrelation",
+      "sha256": "674cdac1b539dabbab59d0ac6b0c108929d85d3da4e1ae2a32e2962efa3c4d51"
+    },
+    {
+      "name": "Lottery",
+      "path": "univariate/Lottery.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/univ/data/Lottery.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "sample mean, sample standard deviation, lag-1 autocorrelation",
+      "sha256": "e79813a132cf9901a85970615a83ca0c6b851c24832c78160734c71da6ff6c3a"
+    },
+    {
+      "name": "Lew",
+      "path": "univariate/Lew.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/univ/data/Lew.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "sample mean, sample standard deviation, lag-1 autocorrelation",
+      "sha256": "53cdc7d066ed1dd726528b4bdd8c51034d37fff6709195de8a0013e5131340e4"
+    },
+    {
+      "name": "Mavro",
+      "path": "univariate/Mavro.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/univ/data/Mavro.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "sample mean, sample standard deviation, lag-1 autocorrelation",
+      "sha256": "dece6cbf88cc99d465df6796d5a0b75ec6ab16ce4f0b0347d27693dff6f0a62d"
+    },
+    {
+      "name": "Michelso",
+      "path": "univariate/Michelso.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/univ/data/Michelso.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "sample mean, sample standard deviation, lag-1 autocorrelation",
+      "sha256": "99b853f9ad5144a28b13ec94824c52ca62ff38e22070e08e0451a746418a82af"
+    },
+    {
+      "name": "NumAcc1",
+      "path": "univariate/NumAcc1.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/univ/data/NumAcc1.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "sample mean, sample standard deviation, lag-1 autocorrelation",
+      "sha256": "b47a34d5ffd654ad897b257a490c8f872098c30775d5dc34a05822a8ecb171ab"
+    },
+    {
+      "name": "NumAcc2",
+      "path": "univariate/NumAcc2.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/univ/data/NumAcc2.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "sample mean, sample standard deviation, lag-1 autocorrelation",
+      "sha256": "2f9bc7f02a4e7925dc59cd72136cfc105e7fbf19fd0ea720a12a077d93e7530a"
+    },
+    {
+      "name": "NumAcc3",
+      "path": "univariate/NumAcc3.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/univ/data/NumAcc3.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "sample mean, sample standard deviation, lag-1 autocorrelation",
+      "sha256": "5efa118827621953f512057d409a75f1f6c02c664879029b0b4db851f7e2f867"
+    },
+    {
+      "name": "NumAcc4",
+      "path": "univariate/NumAcc4.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/univ/data/NumAcc4.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "sample mean, sample standard deviation, lag-1 autocorrelation",
+      "sha256": "5080d83a4014ae3db90b3060152d0d523830842dc04dbda3fa7b35ecd0640423"
+    },
+    {
+      "name": "Norris",
+      "path": "lls/Norris.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/lls/data/LINKS/DATA/Norris.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "regression coefficients and their standard deviations, residual standard deviation, R-squared, and the ANOVA table (df, SS, MS, F)",
+      "sha256": "cc3fd14d1c5fa891d5653000c9d7732c30db842cca49fc051abde1c19d67ab7d"
+    },
+    {
+      "name": "Pontius",
+      "path": "lls/Pontius.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/lls/data/LINKS/DATA/Pontius.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "regression coefficients and their standard deviations, residual standard deviation, R-squared, and the ANOVA table (df, SS, MS, F)",
+      "sha256": "4a48abd813af0d8dc78f8a0762d353d34b73b2fffaa07e266b69fae7b2b0669d"
+    },
+    {
+      "name": "NoInt1",
+      "path": "lls/NoInt1.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/lls/data/LINKS/DATA/NoInt1.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "regression coefficients and their standard deviations, residual standard deviation, R-squared, and the ANOVA table (df, SS, MS, F)",
+      "sha256": "4fc3255e9f2553e8961aafb23d0fa2b50899e898c43a29d486d80c4a28049913"
+    },
+    {
+      "name": "NoInt2",
+      "path": "lls/NoInt2.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/lls/data/LINKS/DATA/NoInt2.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "regression coefficients and their standard deviations, residual standard deviation, R-squared, and the ANOVA table (df, SS, MS, F)",
+      "sha256": "d3501d6dd0c86462e6a5279fbffa91741252868cd43ed9b18f6369479cb9823f"
+    },
+    {
+      "name": "Filip",
+      "path": "lls/Filip.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/lls/data/LINKS/DATA/Filip.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "regression coefficients and their standard deviations, residual standard deviation, R-squared, and the ANOVA table (df, SS, MS, F)",
+      "sha256": "1e8cb9a4644b1c6a8b1038eb46c59543814fa2a8d1ca31cb833040a75bf6a151"
+    },
+    {
+      "name": "Longley",
+      "path": "lls/Longley.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/lls/data/LINKS/DATA/Longley.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "regression coefficients and their standard deviations, residual standard deviation, R-squared, and the ANOVA table (df, SS, MS, F)",
+      "sha256": "c58ef65a2699826d55f134ddef27d09b9fb6ab4499fdd49a408b4cd5a63dc890"
+    },
+    {
+      "name": "Wampler1",
+      "path": "lls/Wampler1.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/lls/data/LINKS/DATA/Wampler1.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "regression coefficients and their standard deviations, residual standard deviation, R-squared, and the ANOVA table (df, SS, MS, F)",
+      "sha256": "6e86af8620ba02368f0c61ee4065bf00e63e828a1b4914979747195c41e7a976"
+    },
+    {
+      "name": "Wampler2",
+      "path": "lls/Wampler2.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/lls/data/LINKS/DATA/Wampler2.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "regression coefficients and their standard deviations, residual standard deviation, R-squared, and the ANOVA table (df, SS, MS, F)",
+      "sha256": "ac45014c4c0d3744d9b92fa918d8f09afade7c2793a89afd5ce796334d9e215b"
+    },
+    {
+      "name": "Wampler3",
+      "path": "lls/Wampler3.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/lls/data/LINKS/DATA/Wampler3.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "regression coefficients and their standard deviations, residual standard deviation, R-squared, and the ANOVA table (df, SS, MS, F)",
+      "sha256": "f30660a33ca97f89f05aec66ad9d8a9b7b1b352d5c09e2dae7bd85515ed699cb"
+    },
+    {
+      "name": "Wampler4",
+      "path": "lls/Wampler4.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/lls/data/LINKS/DATA/Wampler4.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "regression coefficients and their standard deviations, residual standard deviation, R-squared, and the ANOVA table (df, SS, MS, F)",
+      "sha256": "db0f095b52778a8252b4ad9dafca7a8cf737be2c3d8e913832e84370dfb9947c"
+    },
+    {
+      "name": "Wampler5",
+      "path": "lls/Wampler5.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/lls/data/LINKS/DATA/Wampler5.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "regression coefficients and their standard deviations, residual standard deviation, R-squared, and the ANOVA table (df, SS, MS, F)",
+      "sha256": "dd00873dea76a3adb0f7e01be4a9d96f368983cb4be1a89517963a24d3d12afa"
+    },
+    {
+      "name": "SiRstv",
+      "path": "anova/SiRstv.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/anova/SiRstv.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "between/within degrees of freedom, sums of squares, mean squares, the F statistic, R-squared, and the residual standard deviation",
+      "sha256": "c7dc09da0d6a9f37f80caff0f45fd688e883303120e2d776cfab94efb1b4ef13"
+    },
+    {
+      "name": "SmLs01",
+      "path": "anova/SmLs01.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/anova/SmLs01.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "between/within degrees of freedom, sums of squares, mean squares, the F statistic, R-squared, and the residual standard deviation",
+      "sha256": "29d9c979d46d845ed72c0fb0ed79083c8313833bbcf72040326640d87e2e40e4"
+    },
+    {
+      "name": "SmLs02",
+      "path": "anova/SmLs02.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/anova/SmLs02.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "between/within degrees of freedom, sums of squares, mean squares, the F statistic, R-squared, and the residual standard deviation",
+      "sha256": "9c23f2c51935740a123d6882ee41b874b697b3618bdfe2915d1b76370817a080"
+    },
+    {
+      "name": "SmLs03",
+      "path": "anova/SmLs03.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/anova/SmLs03.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "between/within degrees of freedom, sums of squares, mean squares, the F statistic, R-squared, and the residual standard deviation",
+      "sha256": "eb23c78904a4d0a238a144503a4f7db7eb849be21937ef1e20f1dbff2d264355"
+    },
+    {
+      "name": "SmLs04",
+      "path": "anova/SmLs04.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/anova/SmLs04.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "between/within degrees of freedom, sums of squares, mean squares, the F statistic, R-squared, and the residual standard deviation",
+      "sha256": "7c8f87a60245f5c7467418a7725855cce71608273964966e5da954c22ad5fa57"
+    },
+    {
+      "name": "SmLs05",
+      "path": "anova/SmLs05.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/anova/SmLs05.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "between/within degrees of freedom, sums of squares, mean squares, the F statistic, R-squared, and the residual standard deviation",
+      "sha256": "8894da0165059fb0cf2d377d6d087f10c2842b50cf1b47e737cc64ec14253d11"
+    },
+    {
+      "name": "SmLs06",
+      "path": "anova/SmLs06.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/anova/SmLs06.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "between/within degrees of freedom, sums of squares, mean squares, the F statistic, R-squared, and the residual standard deviation",
+      "sha256": "ae23a4613f8b46098984fa422b7db1ef16270f7f20c2787f128d57f0e2b778df"
+    },
+    {
+      "name": "SmLs07",
+      "path": "anova/SmLs07.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/anova/SmLs07.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "between/within degrees of freedom, sums of squares, mean squares, the F statistic, R-squared, and the residual standard deviation",
+      "sha256": "42d492d7577ebe456fa9a204789ea8370c844f508aa3242a8e57c1976b133890"
+    },
+    {
+      "name": "SmLs08",
+      "path": "anova/SmLs08.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/anova/SmLs08.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "between/within degrees of freedom, sums of squares, mean squares, the F statistic, R-squared, and the residual standard deviation",
+      "sha256": "aabc5043423a82786b79fca02b04f8f31f9bcfef25683f15a67edcf359c84d18"
+    },
+    {
+      "name": "SmLs09",
+      "path": "anova/SmLs09.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/anova/SmLs09.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "between/within degrees of freedom, sums of squares, mean squares, the F statistic, R-squared, and the residual standard deviation",
+      "sha256": "aa610b390c8d947ec258e32df0f43467fcb1820f47c5ce25a993ae1d9c715ae7"
+    },
+    {
+      "name": "AtmWtAg",
+      "path": "anova/AtmWtAg.dat",
+      "url": "https://www.itl.nist.gov/div898/strd/anova/AtmWtAg.dat",
+      "retrieved": "2026-07-30",
+      "certifies": "between/within degrees of freedom, sums of squares, mean squares, the F statistic, R-squared, and the residual standard deviation",
+      "sha256": "41d7748bb1f870d8400017c53993eea65862ffd482aae1693be84d93245c303f"
+    }
+  ]
+}

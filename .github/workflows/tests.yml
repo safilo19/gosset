@@ -1,0 +1,75 @@
+name: Tests
+
+# The statistical validation suite, on every push and every pull request.
+#
+# The suite is offline — every reference dataset is committed under
+# backend/tests/reference_data/ — so this job needs no network beyond installing dependencies and
+# cannot go red because NIST's web server is slow.
+#
+# The release workflow runs the same job and will not build an installer unless it passes:
+# see .github/workflows/release.yml. A release cannot ship with a failing statistical test.
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_call: # so release.yml can gate on exactly this job rather than a copy of it
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # 3.11 deliberately, matching requirements.txt's pins and the release build. The numerical
+      # limits recorded in VALIDATION.md were measured on this combination; running the suite on a
+      # different scipy would test a different engine from the one that ships.
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-dev.txt
+
+      # Before the assertions: prove no committed reference dataset has been edited. Every other
+      # result in this run is meaningless if a certified value was changed on the way in.
+      - name: Verify the NIST reference data is unmodified
+        run: python backend/tests/reference_data/nist/fetch_nist.py
+
+      - name: Run the validation suite
+        run: pytest -p no:randomly --durations=10
+
+      # VALIDATION.md is generated from backend/tests/coverage.py. If someone adds a procedure and
+      # regenerates nothing, the manifest silently stops describing the software.
+      - name: Check VALIDATION.md is up to date
+        run: python -m backend.tests.generate_validation --check
+
+      - name: Summarise coverage by tier
+        if: always()
+        run: |
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          from backend.tests import coverage
+          counts = coverage.counts_by_tier()
+          total = len(coverage.REGISTRY)
+          print("## Statistical validation coverage\n")
+          print("| Tier | Procedures |")
+          print("| --- | --- |")
+          for tier in ("nist", "published", "reference", "snapshot", "properties", "none"):
+              if counts[tier]:
+                  print(f"| {coverage.TIER_LABEL[tier]} | {counts[tier]} |")
+          print(f"| **Total** | **{total}** |")
+          print("\nSee [VALIDATION.md](../blob/main/VALIDATION.md) for the per-procedure table.")
+          PY

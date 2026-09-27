@@ -1,0 +1,30 @@
+{
+ "_contract": "A fixed seed and a committed input must give this output. If this file needs to change, say why in the commit message - a diff here is a change in what the software computes.",
+ "_snapshot": "automl_iris_classification",
+ "_what": "Predictive > AutoML, classification of iris species (all estimators random_state 42)",
+ "value": {
+  "best_model": "Logistic Regression",
+  "best_score": 0.9733333333333334,
+  "metric_label": "Accuracy",
+  "n_obs": 150,
+  "results": [
+   {
+    "model": "Logistic Regression",
+    "score": 0.9733333333333334
+   },
+   {
+    "model": "Random Forest",
+    "score": 0.9666666666666668
+   },
+   {
+    "model": "Gradient Boosting",
+    "score": 0.9600000000000002
+   },
+   {
+    "model": "Decision Tree",
+    "score": 0.9533333333333334
+   }
+  ],
+  "task_type_used": "classification"
+ }
+}

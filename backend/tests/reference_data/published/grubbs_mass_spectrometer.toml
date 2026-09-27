@@ -1,0 +1,25 @@
+# SOURCE: NIST/SEMATECH e-Handbook of Statistical Methods, section 1.3.5.17 "Detection of
+#   Outliers", Grubbs' test example. https://www.itl.nist.gov/div898/handbook/eda/section3/eda35h1.htm
+#   The underlying test is Grubbs, F. E. (1969), "Procedures for Detecting Outlying
+#   Observations in Samples", Technometrics 11(1), 1-21.
+# DATA: eight mass-spectrometer measurements, the last of which is the suspected outlier.
+# CERTIFIES: the handbook's worked answer G = 2.4687 for the largest value, against a
+#   5% critical value of 2.126 for n = 8, so the outlier is flagged.
+# VALIDATES: outlier (Grubbs), and the Dixon variant on the same data.
+# RETRIEVED: 2026-07-30
+
+[meta]
+name = "NIST handbook Grubbs example"
+citation = "NIST/SEMATECH e-Handbook of Statistical Methods, 1.3.5.17"
+n = 8
+
+[data]
+measurement = [199.31, 199.53, 200.19, 200.82, 201.92, 201.95, 202.18, 245.57]
+
+[expected]
+kind = "published"
+grubbs_g = 2.4687
+grubbs_critical_5pct = 2.126
+outlier_value = 245.57
+significant = true
+

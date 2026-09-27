@@ -1,0 +1,61 @@
+{
+ "_contract": "A fixed seed and a committed input must give this output. If this file needs to change, say why in the commit message - a diff here is a change in what the software computes.",
+ "_snapshot": "randomization_1proportion_18_of_30",
+ "_what": "Calc > Resampling > Randomization Test for One Proportion, 18 of 30 against 0.5, base 12345",
+ "value": {
+  "highlights": [
+   {
+    "label": "Observed proportion of 'yes'",
+    "value": 0.6
+   },
+   {
+    "label": "P-Value",
+    "tone": null,
+    "value": 0.35264735264735264
+   },
+   {
+    "decimals": 0,
+    "label": "Resamples",
+    "value": 1000
+   },
+   {
+    "decimals": 0,
+    "label": "As extreme",
+    "value": 352
+   }
+  ],
+  "observed": 0.6,
+  "p_value": 0.35264735264735264,
+  "procedure": "randomization_1proportion",
+  "resamples": 1000,
+  "tables": [
+   {
+    "rows": [
+     {
+      "Alternative": "two-sided",
+      "As extreme or more": 352,
+      "Null value": 0.5,
+      "Observed": 0.6,
+      "P-Value": 0.35264735264735264,
+      "Resamples": 1000,
+      "Statistic": "proportion of 'yes'"
+     }
+    ],
+    "title": "Randomization test"
+   },
+   {
+    "rows": [
+     {
+      "Column": "outcome",
+      "Event": "yes",
+      "Events": 18,
+      "Hypothesized": 0.5,
+      "N": 30,
+      "Observed proportion": 0.6
+     }
+    ],
+    "title": "Sample"
+   }
+  ]
+ }
+}

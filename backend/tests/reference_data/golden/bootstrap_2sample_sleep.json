@@ -1,0 +1,64 @@
+{
+ "_contract": "A fixed seed and a committed input must give this output. If this file needs to change, say why in the commit message - a diff here is a change in what the software computes.",
+ "_snapshot": "bootstrap_2sample_sleep",
+ "_what": "Calc > Resampling > Bootstrap for 2-Sample Means, sleep drug1 vs drug2, base 12345",
+ "value": {
+  "bootstrap_se": 0.7884071952395573,
+  "ci": [
+   -3.1122499999999986,
+   -0.1592500000000004
+  ],
+  "confidence_level": 0.95,
+  "highlights": [
+   {
+    "label": "Observed difference in means",
+    "value": -1.5799999999999996
+   },
+   {
+    "label": "Bootstrap SE",
+    "value": 0.7884071952395573
+   },
+   {
+    "label": "95% CI low",
+    "value": -3.1122499999999986
+   },
+   {
+    "label": "95% CI high",
+    "value": -0.1592500000000004
+   }
+  ],
+  "observed": -1.5799999999999996,
+  "procedure": "bootstrap_2sample",
+  "resamples": 1000,
+  "tables": [
+   {
+    "rows": [
+     {
+      "95% percentile CI": "(-3.11225, -0.15925)",
+      "Bootstrap SE": 0.7884071952395573,
+      "Bootstrap mean": -1.58202,
+      "Observed": -1.5799999999999996,
+      "Resamples": 1000,
+      "Statistic": "difference in means"
+     }
+    ],
+    "title": "Resampling summary"
+   },
+   {
+    "rows": [
+     {
+      "Mean": 0.75,
+      "N": 10,
+      "Sample": "drug1"
+     },
+     {
+      "Mean": 2.3299999999999996,
+      "N": 10,
+      "Sample": "drug2"
+     }
+    ],
+    "title": "Samples"
+   }
+  ]
+ }
+}

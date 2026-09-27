@@ -1,0 +1,103 @@
+{
+ "_contract": "A fixed seed and a committed input must give this output. If this file needs to change, say why in the commit message - a diff here is a change in what the software computes.",
+ "_snapshot": "rfm_sample_customers",
+ "_what": "Multivariate > Segmentation, RFM on the repository's sample_customers.csv",
+ "value": {
+  "assignments": [
+   "Champions",
+   "Champions",
+   "New/Promising",
+   "Loyal Customers",
+   "Potential Loyalists",
+   "Potential Loyalists",
+   "Lost",
+   "Lost",
+   "Champions",
+   "Champions",
+   "Needs Attention",
+   "Loyal Customers",
+   "Champions",
+   "Potential Loyalists",
+   "Lost",
+   "Champions",
+   "Needs Attention",
+   "New/Promising",
+   "At Risk",
+   "Lost"
+  ],
+  "method_used": "rfm",
+  "n_rows_used": 20,
+  "segments": [
+   {
+    "mean_values": {
+     "order_count": 11.833333333333334,
+     "recency_days": 26.0,
+     "total_spent": 3383.3333333333335
+    },
+    "profile": "Recent, frequent, high-spending customers \u2014 your best customers.",
+    "segment": "Champions",
+    "size": 6
+   },
+   {
+    "mean_values": {
+     "order_count": 1.75,
+     "recency_days": 751.5,
+     "total_spent": 125.0
+    },
+    "profile": "Long time since last purchase, low frequency and spend \u2014 likely churned.",
+    "segment": "Lost",
+    "size": 4
+   },
+   {
+    "mean_values": {
+     "order_count": 12.666666666666666,
+     "recency_days": 201.66666666666666,
+     "total_spent": 3900.0
+    },
+    "profile": "High frequency/spend but haven't purchased as recently \u2014 worth re-engaging.",
+    "segment": "Potential Loyalists",
+    "size": 3
+   },
+   {
+    "mean_values": {
+     "order_count": 2.5,
+     "recency_days": 3.0,
+     "total_spent": 240.0
+    },
+    "profile": "Purchased recently but haven't built up frequency or spend yet.",
+    "segment": "New/Promising",
+    "size": 2
+   },
+   {
+    "mean_values": {
+     "order_count": 4.5,
+     "recency_days": 62.0,
+     "total_spent": 775.0
+    },
+    "profile": "Buy regularly and recently, with solid spend \u2014 reliable repeat customers.",
+    "segment": "Loyal Customers",
+    "size": 2
+   },
+   {
+    "mean_values": {
+     "order_count": 5.0,
+     "recency_days": 140.5,
+     "total_spent": 950.0
+    },
+    "profile": "Middling on recency, frequency, and spend \u2014 neither strong nor lost.",
+    "segment": "Needs Attention",
+    "size": 2
+   },
+   {
+    "mean_values": {
+     "order_count": 10.0,
+     "recency_days": 411.0,
+     "total_spent": 2900.0
+    },
+    "profile": "Used to buy often and spend a lot, but haven't purchased in a while \u2014 winnable back.",
+    "segment": "At Risk",
+    "size": 1
+   }
+  ]
+ }
+}

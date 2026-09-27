@@ -1,0 +1,96 @@
+# SOURCE: Agresti, A. (1996). An Introduction to Categorical Data Analysis. Wiley. Retrieved
+#   from the copy distributed with statsmodels (`statsmodels.api.datasets.cpunish`), which is
+#   the dataset statsmodels uses as its own documented Poisson GLM example.
+# DATA: 17 US states in 1997 — executions carried out, median income, poverty rate, percent
+#   black, violent crime rate, a South indicator, and percent with a degree.
+# CERTIFIES: the DATA is published; the coefficients below are NOT quoted from Agresti and
+#   are marked `kind = "reference-implementation"` accordingly. They come from fitting the
+#   log-link Poisson GLM with an intercept, and the test re-derives them from scratch with a
+#   plain Iteratively Reweighted Least Squares loop written out longhand — so what is being
+#   checked is Gosset against the IRLS definition, not Gosset against another call to the
+#   same library function.
+# VALIDATES: poisson_regression (coefficients, incidence-rate ratios).
+# RETRIEVED: 2026-07-30
+
+[meta]
+name = "US capital punishment, 1997"
+citation = "Agresti, A. (1996). An Introduction to Categorical Data Analysis. Wiley."
+n = 17
+
+[data]
+executions = [37, 9, 6, 4, 3, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+income = [
+  34453.0,
+  41534.0,
+  35802.0,
+  26954.0,
+  31468.0,
+  32552.0,
+  40873.0,
+  34861.0,
+  42562.0,
+  31900.0,
+  37421.0,
+  33305.0,
+  32108.0,
+  45844.0,
+  34743.0,
+  29709.0,
+  36777.0,
+]
+perpoverty = [16.7, 12.5, 10.6, 18.4, 14.8, 18.8, 11.6, 13.1, 9.4, 14.3, 8.2, 16.4, 18.4, 9.3, 10.0, 15.2, 11.7]
+perblack = [12.2, 20.0, 11.2, 16.1, 25.9, 3.5, 15.3, 30.1, 4.3, 15.4, 8.2, 7.2, 32.1, 27.4, 4.0, 7.7, 1.8]
+vc100k96 = [
+  644.0,
+  351.0,
+  591.0,
+  524.0,
+  565.0,
+  632.0,
+  886.0,
+  997.0,
+  405.0,
+  1051.0,
+  537.0,
+  321.0,
+  929.0,
+  931.0,
+  435.0,
+  597.0,
+  463.0,
+]
+south = [1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0]
+degree = [
+  0.16,
+  0.27,
+  0.21,
+  0.16,
+  0.19,
+  0.25,
+  0.25,
+  0.21,
+  0.31,
+  0.24,
+  0.19,
+  0.16,
+  0.18,
+  0.29,
+  0.24,
+  0.21,
+  0.25,
+]
+
+[expected]
+kind = "reference-implementation"
+terms = ["Constant", "income", "perpoverty", "perblack", "vc100k96", "south", "degree"]
+coefficients = [
+  -4.770212977499601,
+  0.0002566657572811775,
+  0.07367587968843849,
+  -0.09248670213461459,
+  0.00018873765571290562,
+  2.3108277000895194,
+  -19.127658825859765,
+]
+note = "Log-link Poisson GLM with an intercept, fitted by the longhand IRLS loop in this script (the same loop the test re-runs). Not a published figure."
+

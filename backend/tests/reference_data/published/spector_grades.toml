@@ -1,0 +1,96 @@
+# SOURCE: Spector, L. and Mazzeo, M. (1980). "Probit Analysis and Economic Education."
+#   Journal of Economic Education 11, 37-44. Retrieved from the copy distributed with
+#   statsmodels (`statsmodels.api.datasets.spector`), which is the dataset statsmodels uses
+#   as its own documented Logit example.
+# DATA: 32 students. GRADE is 1 if the grade improved; PSI is 1 if the student was taught by
+#   a personalised system of instruction; GPA and TUCE are prior attainment scores.
+# CERTIFIES: the maximum-likelihood logit coefficients printed in statsmodels' Logit example
+#   output: const -13.0213, GPA 2.8261, TUCE 0.0952, PSI 2.3787, and the corresponding odds
+#   ratios exp(coef). Log-likelihood at convergence -12.8896.
+# VALIDATES: binary_logistic (coefficients, odds ratios), binary_fitted_line.
+# RETRIEVED: 2026-07-30
+
+[meta]
+name = "Spector & Mazzeo economics grades"
+citation = "Spector, L. and Mazzeo, M. (1980). Journal of Economic Education 11:37-44"
+n = 32
+
+[data]
+gpa = [
+  2.66,
+  2.89,
+  3.28,
+  2.92,
+  4.0,
+  2.86,
+  2.76,
+  2.87,
+  3.03,
+  3.92,
+  2.63,
+  3.32,
+  3.57,
+  3.26,
+  3.53,
+  2.74,
+  2.75,
+  2.83,
+  3.12,
+  3.16,
+  2.06,
+  3.62,
+  2.89,
+  3.51,
+  3.54,
+  2.83,
+  3.39,
+  2.67,
+  3.65,
+  4.0,
+  3.1,
+  2.39,
+]
+tuce = [
+  20.0,
+  22.0,
+  24.0,
+  12.0,
+  21.0,
+  17.0,
+  17.0,
+  21.0,
+  25.0,
+  29.0,
+  20.0,
+  23.0,
+  23.0,
+  25.0,
+  26.0,
+  19.0,
+  25.0,
+  19.0,
+  23.0,
+  25.0,
+  22.0,
+  28.0,
+  14.0,
+  26.0,
+  24.0,
+  27.0,
+  17.0,
+  24.0,
+  21.0,
+  23.0,
+  21.0,
+  19.0,
+]
+psi = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+grade = [0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 1]
+
+[expected]
+kind = "published"
+terms = ["Constant", "gpa", "tuce", "psi"]
+coefficients = [-13.021347014669962, 2.8261124070685617, 0.09515765001172263, 2.378688367882394]
+odds_ratios = [2.212774348e-06, 16.879714, 1.099832, 10.790733]
+log_likelihood = -12.889633
+

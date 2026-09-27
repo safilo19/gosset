@@ -1,0 +1,30 @@
+# SOURCE: Clopper, C. J. and Pearson, E. S. (1934). "The use of confidence or fiducial limits
+#   illustrated in the case of the binomial." Biometrika 26(4), 404-413 — the exact interval
+#   Gosset labels "Exact (binomial)". The two cases below are the ones used throughout the
+#   literature to illustrate it.
+# DATA: two summarised binomial samples.
+# CERTIFIES: nothing is taken on trust here. The exact interval is the pair of Beta quantiles
+#   Clopper and Pearson define — lower = Beta(k, n-k+1) at alpha/2, upper = Beta(k+1, n-k) at
+#   1-alpha/2 — and the exact two-sided p-value is a sum of binomial terms, both of which the
+#   test computes independently of Gosset's code path.
+# VALIDATES: prop1 (exact and normal), prop2.
+# RETRIEVED: 2026-07-30
+
+[meta]
+name = "Clopper-Pearson exact binomial interval"
+citation = "Clopper, C. J. and Pearson, E. S. (1934). Biometrika 26(4):404-413"
+n = 2
+
+[data]
+case1_events = 3
+case1_trials = 10
+case1_hypothesized_p = 0.5
+case2_events = 82
+case2_trials = 100
+case2_hypothesized_p = 0.75
+two_sample_events = [51, 74]
+two_sample_trials = [100, 100]
+
+[expected]
+kind = "hand"
+

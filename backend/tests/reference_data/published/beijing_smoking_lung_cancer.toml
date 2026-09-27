@@ -1,0 +1,26 @@
+# SOURCE: Liu, Z. (1992). "Smoking and lung cancer incidence in China."
+#   International Journal of Epidemiology 21, 197-201. Retrieved from the copy distributed
+#   with statsmodels (`statsmodels.api.datasets.china_smoking`), Beijing stratum.
+# DATA: a 2x2 table of 322 people — smoker yes/no against lung cancer yes/no.
+#   smoker & cancer 126, smoker & no cancer 100, non-smoker & cancer 35, neither 61.
+#   Expanded to one row per person, because the chi-square dialog cross-tabulates two columns.
+# CERTIFIES: the 2x2 counts as published. The chi-square statistic, its Yates correction and
+#   the odds ratio are all derived longhand in the test from the counts.
+# VALIDATES: chi_square (test of independence).
+# RETRIEVED: 2026-07-30
+
+[meta]
+name = "Beijing smoking and lung cancer"
+citation = "Liu, Z. (1992). International Journal of Epidemiology 21:197-201"
+n = 322
+
+[data]
+smoker_cancer = 126
+smoker_no_cancer = 100
+nonsmoker_cancer = 35
+nonsmoker_no_cancer = 61
+
+[expected]
+kind = "hand"
+total = 322
+

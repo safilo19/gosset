@@ -1,0 +1,30 @@
+{
+ "_contract": "A fixed seed and a committed input must give this output. If this file needs to change, say why in the commit message - a diff here is a change in what the software computes.",
+ "_snapshot": "automl_iris_regression",
+ "_what": "Predictive > AutoML, regression on Fisher's iris (all estimators random_state 42)",
+ "value": {
+  "best_model": "Linear Regression",
+  "best_score": 0.6127982202457981,
+  "metric_label": "R\u00b2",
+  "n_obs": 150,
+  "results": [
+   {
+    "model": "Linear Regression",
+    "score": 0.6127982202457981
+   },
+   {
+    "model": "Random Forest",
+    "score": 0.5286221337374934
+   },
+   {
+    "model": "Gradient Boosting",
+    "score": 0.4983791698794383
+   },
+   {
+    "model": "Decision Tree",
+    "score": 0.3293276093606444
+   }
+  ],
+  "task_type_used": "regression"
+ }
+}

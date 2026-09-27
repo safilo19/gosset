@@ -1,0 +1,12 @@
+# Everything needed to run the validation suite, on top of requirements.txt.
+#
+#     pip install -r requirements.txt -r requirements-dev.txt
+#     pytest
+#
+# The suite is offline: the NIST StRD files are committed under
+# backend/tests/reference_data/nist/ and re-downloading them is a separate manual script.
+
+-r requirements.txt
+
+pytest==9.1.1
+pytest-cov==7.1.0

@@ -1,0 +1,44 @@
+# SOURCE: Anscombe, F. J. (1973). "Graphs in Statistical Analysis." The American Statistician
+#   27(1), 17-21, Table 1. Distributed with R as the `anscombe` dataset.
+# DATA: four x/y pairs of 11 points each, constructed so that all four share the same simple
+#   linear regression while looking nothing like each other.
+# CERTIFIES: the summary Anscombe prints as common to all four sets — intercept 3.00,
+#   slope 0.500, r-squared 0.667, standard error of slope 0.118, t = 4.24, regression sum of
+#   squares 27.50 on 1 df and residual sum of squares 13.75 on 9 df.
+# NOTE ON PRECISION: the four sets are identical only to the precision Anscombe prints. The
+#   actual regression sums of squares are 27.51 / 27.50 / 27.47 / 27.49 and the r-squareds
+#   0.66654 / 0.66624 / 0.66632 / 0.66671. The tests therefore compare against these
+#   published figures with an ABSOLUTE tolerance matching the printed decimals, and compare
+#   against the longhand least-squares formulas at full precision separately.
+# VALIDATES: fitted_line, fit_model, correlation.
+# RETRIEVED: 2026-07-30
+
+[meta]
+name = "Anscombe's quartet"
+citation = "Anscombe, F. J. (1973). The American Statistician 27(1):17-21"
+n = 11
+
+[data]
+x1 = [10.0, 8.0, 13.0, 9.0, 11.0, 14.0, 6.0, 4.0, 12.0, 7.0, 5.0]
+x2 = [10.0, 8.0, 13.0, 9.0, 11.0, 14.0, 6.0, 4.0, 12.0, 7.0, 5.0]
+x3 = [10.0, 8.0, 13.0, 9.0, 11.0, 14.0, 6.0, 4.0, 12.0, 7.0, 5.0]
+x4 = [8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 19.0, 8.0, 8.0, 8.0]
+y1 = [8.04, 6.95, 7.58, 8.81, 8.33, 9.96, 7.24, 4.26, 10.84, 4.82, 5.68]
+y2 = [9.14, 8.14, 8.74, 8.77, 9.26, 8.1, 6.13, 3.1, 9.13, 7.26, 4.74]
+y3 = [7.46, 6.77, 12.74, 7.11, 7.81, 8.84, 6.08, 5.39, 8.15, 6.42, 5.73]
+y4 = [6.58, 5.76, 7.71, 8.84, 8.47, 7.04, 5.25, 12.5, 5.56, 7.91, 6.89]
+
+[expected]
+kind = "published"
+intercept = 3.0
+slope = 0.5
+r_squared = 0.667
+se_slope = 0.118
+t_slope = 4.24
+regression_ss = 27.5
+residual_ss = 13.75
+atol_coefficient = 0.005
+atol_r_squared = 0.001
+atol_sum_of_squares = 0.03
+tolerance_note = "Anscombe rounds to 2-3 decimals in the paper, so these are compared with an absolute tolerance matching the printed precision, not the suite default. The full-precision check is against the longhand least-squares formulas instead."
+
