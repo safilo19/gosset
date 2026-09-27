@@ -271,6 +271,7 @@ def build_story(sections: Iterable[Section], meta: ReportMeta, formatter: Callab
     story.append(components.spacer(14 * mm))
 
     section_list = list(sections)
+    first_card = True
     for index, section in enumerate(section_list):
         if section.note:
             note = components.note_block(section.note)
@@ -290,14 +291,23 @@ def build_story(sections: Iterable[Section], meta: ReportMeta, formatter: Callab
             story.append(components.result_card(section.title, card_meta, body, wide, keep_together=False))
             story.append(NextPageTemplate("portrait"))
             story.append(PageBreak())
+            first_card = False
             continue
 
         # KeepTogether only when the card plausibly fits a page: wrapping a taller-than-a-page card in
         # it makes reportlab move it to a fresh page where it still does not fit, and the split it then
         # performs is the ugly kind.
-        story.append(components.result_card(section.title, card_meta, body, width, keep_together=True))
+        #
+        # The FIRST card is never kept together, whatever its size. It sits directly beneath the cover
+        # block, so KeepTogether would bump it wholesale to page 2 the moment it is taller than the
+        # space left under the cover — even a card that fits a full page — and page 1 would show nothing
+        # but the cover heading. The row-per-flowable card splits with its border continued (see
+        # result_card), so letting the first one flow keeps page 1 populated and the break clean.
+        keep = not first_card
+        story.append(components.result_card(section.title, card_meta, body, width, keep_together=keep))
         if index != len(section_list) - 1:
             story.append(components.spacer(9))
+        first_card = False
 
     return story
 
