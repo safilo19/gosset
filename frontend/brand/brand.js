@@ -21,6 +21,15 @@ const NAMESAKE = 'Named for W. S. Gosset — “Student”, 1908';
 /** Where About's "Release notes" link and the updater's manual-download fallback point. */
 const REPO_URL = 'https://github.com/safilo19/personal-analytics-mcp';
 const CREDITS = 'FastAPI · pandas · SciPy · statsmodels · scikit-learn · Chart.js · Plotly · matplotlib';
+/**
+ * The validation claim, shown in About with a link to the manifest.
+ *
+ * Kept here beside the other About strings rather than inline in app.js, so the claim and the
+ * document backing it are edited together — a version of this sentence that outlived VALIDATION.md
+ * would be the worst possible thing to print in a statistics package.
+ */
+const VALIDATION = 'Statistical engine validated against NIST reference datasets';
+const VALIDATION_URL = `${REPO_URL}/blob/main/VALIDATION.md`;
 
 const cache = new Map();
 
@@ -42,6 +51,8 @@ export const name = NAME;
 export const namesake = NAMESAKE;
 export const credits = CREDITS;
 export const repoUrl = REPO_URL;
+export const validation = VALIDATION;
+export const validationUrl = VALIDATION_URL;
 
 /** Inline the full lockup (mark + wordmark) into an element. */
 export async function mountLogo(host) {

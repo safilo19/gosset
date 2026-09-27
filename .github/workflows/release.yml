@@ -20,7 +20,15 @@ permissions:
   contents: write # required to create the Release and upload assets
 
 jobs:
+  # A release cannot ship with a failing statistical test, ever. This runs the same job the Tests
+  # workflow runs — reused via workflow_call rather than copied, so the two can never drift — and
+  # the build below is `needs: test`, which means a red suite stops the installer being built at
+  # all rather than producing one with a warning beside it.
+  test:
+    uses: ./.github/workflows/tests.yml
+
   windows:
+    needs: test
     runs-on: windows-latest
     timeout-minutes: 60
 

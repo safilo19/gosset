@@ -2004,8 +2004,14 @@ function openAboutWindow() {
       }),
     ]),
     h('p', { class: 'about-credits', text: `Built on ${brand.credits}` }),
+    // The validation claim, with the manifest one click away — a claim of this kind should never
+    // appear without the evidence beside it.
+    h('p', { class: 'about-credits' }, [
+      h('span', { text: `${brand.validation} — ` }),
+      h('a', { href: brand.validationUrl, target: '_blank', rel: 'noreferrer', text: 'see VALIDATION.md' }),
+    ]),
   ]);
-  wm.createWindow({ id: 'about', title: `About ${brand.name}`, kind: 'result', width: 380, height: 320, content });
+  wm.createWindow({ id: 'about', title: `About ${brand.name}`, kind: 'result', width: 380, height: 360, content });
   // The mark is fetched, so the panel's real height is only known a tick later; without this the
   // credits line lands under the fold behind a scrollbar.
   requestAnimationFrame(() => wm.fitToContent('about'));
