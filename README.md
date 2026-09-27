@@ -383,6 +383,16 @@ app's "What's new" window.
 The release is refused before anything is built if the tag disagrees with `package.json`, if the
 changelog section is missing or still holds its placeholder, or if the update feed was not produced.
 
+## Star History
+
+<a href="https://www.star-history.com/?repos=safilo19%2Fgosset&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=safilo19/gosset&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=safilo19/gosset&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=safilo19/gosset&type=date&legend=top-left" />
+ </picture>
+</a>
+
 ## License
 
 **Source-available, all rights reserved** — see [LICENSE](LICENSE).
