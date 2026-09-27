@@ -79,8 +79,13 @@ COEFFICIENT_RTOL = {
     "Wampler5": 1e-5,
 }
 
-# Worst-coefficient agreement in significant digits, measured, asserted as a floor. These are the
-# numbers VALIDATION.md quotes.
+# Worst-coefficient agreement in significant digits, measured, asserted as a floor. Most sit at the
+# number VALIDATION.md quotes for this build. The two most ill-conditioned sets — Wampler4 and
+# Wampler5, whose signal is swamped by 1e4/1e6 noise on purpose — are the exception: a Linux BLAS
+# reaches ~7.85 and ~5.85 digits where this build reaches ~8.03 and ~6.04, so their floors carry a
+# ~1-digit margin below the measured agreement, exactly as COEFFICIENT_RTOL does, so a
+# differently-built BLAS cannot turn a correct answer red. `test_reduced_precision_notes_are_honest`
+# still holds each floor within four digits of what the build actually achieves.
 COEFFICIENT_DIGIT_FLOOR = {
     "Norris": 12.0,
     "Pontius": 6.0,
@@ -88,8 +93,8 @@ COEFFICIENT_DIGIT_FLOOR = {
     "Wampler1": 9.0,
     "Wampler2": 10.0,
     "Wampler3": 9.0,
-    "Wampler4": 8.0,
-    "Wampler5": 6.0,
+    "Wampler4": 7.0,
+    "Wampler5": 5.0,
 }
 
 # Wampler1 and Wampler2 fit their polynomial exactly: NIST certifies a residual SS of 0 and prints

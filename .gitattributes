@@ -1,0 +1,8 @@
+# The NIST StRD reference datasets are byte-exact copies of what NIST publishes, and their SHA-256 is
+# recorded in backend/tests/reference_data/nist/manifest.json and re-hashed on every test run
+# (backend/tests/nist/test_nist_manifest.py). git's autocrlf must never rewrite their line endings on
+# checkout — on a Windows working tree that turns the committed LF into CRLF and every hash test fails,
+# with no code change. Treating them as binary keeps the bytes on disk equal to the committed bytes on
+# every platform, which is exactly the "stable across platforms and git autocrlf settings" guarantee
+# fetch_nist.py's CRLF->LF normalisation is meant to give.
+backend/tests/reference_data/nist/**/*.dat -text
